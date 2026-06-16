@@ -9,14 +9,22 @@ let usuarios = [];
 let colmeias = [];
 let vistorias = [];
 let camposTexto = [];
+let setores = [];           // NOVO
 let usuarioLogado = null;
 let adminLiberado = false;
 let categoriaAtual = null;
 let atividadeAtual = null;
+let setorAtual = null;      // NOVO — setor selecionado na tela de categoria
 let colmeiaAtual = null;
 let mesAtual = new Date().getMonth();
 let anoAtual = new Date().getFullYear();
 let diaSelecionado = null;
+
+// Estoque
+let estoqueItens = [];
+let estoqueMovimentacoes = [];
+let categoriaSelecionadaEstoque = null;
+let setorSelecionadoEstoque = null;  // NOVO
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -82,6 +90,7 @@ async function carregarTudo() {
         colmeias       = await db.get('colmeias');
         vistorias      = await db.get('vistorias');
         camposTexto    = await db.get('campos_texto');
+        setores        = await db.get('setores');          // NOVO
         estoqueItens          = await db.get('estoque_itens');
         estoqueMovimentacoes  = await db.get('estoque_movimentacoes');
 
@@ -171,36 +180,124 @@ function mostrarTela(nome) {
     if (nome === 'dashboard') renderizarDashboard();
     if (nome === 'relatorios') carregarRelatorios();
     if (nome === 'colmeias') renderizarColmeias();
-if (nome === 'acoes') { setTimeout(() => { const hoje = new Date(); const trinta = new Date(); trinta.setDate(hoje.getDate() - 30); document.getElementById('filtroAcoesDE').value = trinta.toISOString().split('T')[0]; document.getElementById('filtroAcoesATE').value = hoje.toISOString().split('T')[0]; gerarRelatorioAcoes(); }, 100); }
+    if (nome === 'acoes') {
+        setTimeout(() => {
+            const hoje = new Date();
+            const trinta = new Date();
+            trinta.setDate(hoje.getDate() - 30);
+            document.getElementById('filtroAcoesDE').value = trinta.toISOString().split('T')[0];
+            document.getElementById('filtroAcoesATE').value = hoje.toISOString().split('T')[0];
+            gerarRelatorioAcoes();
+        }, 100);
+    }
     if (nome === 'usuarios') renderizarUsuarios();
-    if (nome === 'estoque') { carregarEstoque().then(() => { renderizarAbasEstoque(); renderizarTabelaEstoque(); }); }
+    if (nome === 'estoque') {
+        carregarEstoque().then(() => {
+            renderizarAbasEstoque();
+            renderizarTabelaEstoque();
+        });
+    }
     if (nome === 'inicio') { renderizarCalendarioGeral(); renderizarResumoGeral(); }
 }
 
+// =============================================
+// CATEGORIA — COM SUPORTE A SETORES
+// =============================================
 function abrirCategoria(categoriaId) {
     categoriaAtual = categorias.find(c => c.id === categoriaId);
     if (!categoriaAtual) return;
-    document.getElementById('tituloCategoriaAtual').textContent = `${categoriaAtual.icone} ${categoriaAtual.nome}`;
-    const ativsCategoria = atividades.filter(a => a.categoria_id === categoriaId);
-    const container = document.getElementById('listaAtividades');
-    if (ativsCategoria.length === 0) {
-        container.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:#999;padding:40px">Nenhuma atividade cadastrada.</div>`;
+
+    // Reseta setor selecionado
+    setorAtual = null;
+
+    document.getElementById('tituloCategoriaAtual').textContent =
+        `${categoriaAtual.icone || ''} ${categoriaAtual.nome}`;
+
+    const setoresDaCategoria = setores
+        .filter(s => s.categoria_id === categoriaId)
+        .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+    const containerAbas = document.getElementById('containerAbasSetor');
+    const abasEl = document.getElementById('abasSetor');
+
+    if (setoresDaCategoria.length > 0) {
+        // Seleciona o primeiro setor por padrão
+        setorAtual = setoresDaCategoria[0];
+        containerAbas.classList.remove('hidden');
+        abasEl.innerHTML = setoresDaCategoria.map(s => `
+            <button class="aba-setor ${s.id === setorAtual.id ? 'ativa' : ''}"
+                onclick="selecionarSetorCategoria('${s.id}')">
+                ${s.icone || ''} ${s.nome}
+            </button>
+        `).join('');
     } else {
-        const hoje = new Date();
-        container.innerHTML = ativsCategoria.map(at => {
-            const regsEsteMes = registros.filter(r => {
-                if (r.atividade_id !== at.id) return false;
-                const d = new Date(r.data + 'T12:00:00');
-                return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
-            });
-            return `<div class="card-atividade" onclick="abrirAtividade('${at.id}')">
-                <h3>${at.nome}</h3>
-                <div class="frequencia">🔄 ${at.frequencia || 'Frequência não definida'}</div>
-                <div class="registros-mes">📝 ${regsEsteMes.length} registro(s) este mês</div>
-            </div>`;
-        }).join('');
+        containerAbas.classList.add('hidden');
+        abasEl.innerHTML = '';
     }
+
+    renderizarAtividadesCategoria();
     mostrarTela('categoria');
+}
+
+function selecionarSetorCategoria(setorId) {
+    setorAtual = setores.find(s => s.id === setorId);
+    // Atualiza abas
+    document.querySelectorAll('#abasSetor .aba-setor').forEach(btn => {
+        btn.classList.toggle('ativa', btn.onclick.toString().includes(setorId));
+    });
+    // Rerender abas com classe correta
+    const setoresDaCategoria = setores
+        .filter(s => s.categoria_id === categoriaAtual.id)
+        .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    document.getElementById('abasSetor').innerHTML = setoresDaCategoria.map(s => `
+        <button class="aba-setor ${s.id === setorId ? 'ativa' : ''}"
+            onclick="selecionarSetorCategoria('${s.id}')">
+            ${s.icone || ''} ${s.nome}
+        </button>
+    `).join('');
+    renderizarAtividadesCategoria();
+}
+
+function renderizarAtividadesCategoria() {
+    if (!categoriaAtual) return;
+    const container = document.getElementById('listaAtividades');
+    const hoje = new Date();
+
+    // Filtra atividades: se tem setores e setor selecionado, filtra por setor_id
+    // Se a categoria não tem setores, mostra todas da categoria
+    const setoresDaCategoria = setores.filter(s => s.categoria_id === categoriaAtual.id);
+    let ativsCategoria;
+
+    if (setoresDaCategoria.length > 0 && setorAtual) {
+        // Mostra atividades do setor selecionado
+        ativsCategoria = atividades.filter(a =>
+            a.categoria_id === categoriaAtual.id && a.setor_id === setorAtual.id
+        );
+    } else {
+        // Categoria sem setores: mostra todas
+        ativsCategoria = atividades.filter(a => a.categoria_id === categoriaAtual.id);
+    }
+
+    if (ativsCategoria.length === 0) {
+        const msg = setorAtual
+            ? `Nenhuma atividade cadastrada para o setor <b>${setorAtual.nome}</b>.`
+            : 'Nenhuma atividade cadastrada.';
+        container.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:#999;padding:40px">${msg}</div>`;
+        return;
+    }
+
+    container.innerHTML = ativsCategoria.map(at => {
+        const regsEsteMes = registros.filter(r => {
+            if (r.atividade_id !== at.id) return false;
+            const d = new Date(r.data + 'T12:00:00');
+            return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
+        });
+        return `<div class="card-atividade" onclick="abrirAtividade('${at.id}')">
+            <h3>${at.nome}</h3>
+            <div class="frequencia">🔄 ${at.frequencia || 'Frequência não definida'}</div>
+            <div class="registros-mes">📝 ${regsEsteMes.length} registro(s) este mês</div>
+        </div>`;
+    }).join('');
 }
 
 function voltarParaCategoria() {
@@ -226,7 +323,7 @@ async function abrirAtividade(atividadeId) {
 }
 
 // =============================================
-// CALENDÁRIO GERAL
+// CALENDÁRIO GERAL — COM SUB-LINHAS DE SETOR
 // =============================================
 function renderizarCalendarioGeral() {
     const corpo = document.getElementById('corpoCalendario');
@@ -235,15 +332,56 @@ function renderizarCalendarioGeral() {
         corpo.innerHTML = `<tr><td colspan="13" class="loading"><span class="spinner"></span> Carregando...</td></tr>`;
         return;
     }
-    corpo.innerHTML = categorias.map(cat => {
-        const temAtividade = atividades.some(a => a.categoria_id === cat.id);
-        const mesesHTML = Array.from({length: 12}, () =>
-            `<td style="color:${temAtividade ? '#4caf50' : '#ccc'}">${temAtividade ? '✕' : '○'}</td>`
-        ).join('');
-        return `<tr class="linha-categoria" onclick="abrirCategoria('${cat.id}')">
-            <td>${cat.icone} ${cat.nome}</td>${mesesHTML}
-        </tr>`;
-    }).join('');
+
+    let html = '';
+
+    categorias.forEach(cat => {
+        const setoresDaCategoria = setores
+            .filter(s => s.categoria_id === cat.id)
+            .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+        if (setoresDaCategoria.length > 0) {
+            // Linha de cabeçalho da categoria (não clicável, só título)
+            html += `<tr class="linha-categoria-pai">
+                <td colspan="13" style="background:var(--verde-suave);font-weight:700;color:var(--verde-escuro);padding-left:14px">
+                    ${cat.icone || ''} ${cat.nome}
+                </td>
+            </tr>`;
+
+            // Uma linha por setor
+            setoresDaCategoria.forEach(setor => {
+                const temAtividade = atividades.some(
+                    a => a.categoria_id === cat.id && a.setor_id === setor.id
+                );
+                const mesesHTML = Array.from({length: 12}, () =>
+                    `<td style="color:${temAtividade ? '#4caf50' : '#ccc'}">${temAtividade ? '✕' : '○'}</td>`
+                ).join('');
+                html += `<tr class="linha-setor" onclick="abrirCategoriaSetor('${cat.id}','${setor.id}')">
+                    <td class="celula-setor">${setor.icone || '—'} ${setor.nome}</td>
+                    ${mesesHTML}
+                </tr>`;
+            });
+
+        } else {
+            // Categoria sem setores — comportamento original
+            const temAtividade = atividades.some(a => a.categoria_id === cat.id);
+            const mesesHTML = Array.from({length: 12}, () =>
+                `<td style="color:${temAtividade ? '#4caf50' : '#ccc'}">${temAtividade ? '✕' : '○'}</td>`
+            ).join('');
+            html += `<tr class="linha-categoria" onclick="abrirCategoria('${cat.id}')">
+                <td>${cat.icone || ''} ${cat.nome}</td>${mesesHTML}
+            </tr>`;
+        }
+    });
+
+    corpo.innerHTML = html;
+}
+
+// Abre categoria já no setor correto
+function abrirCategoriaSetor(categoriaId, setorId) {
+    abrirCategoria(categoriaId);
+    // Seleciona o setor após renderizar
+    setTimeout(() => selecionarSetorCategoria(setorId), 50);
 }
 
 function renderizarResumoGeral() {
@@ -966,26 +1104,115 @@ document.addEventListener('keydown', e => {
 });
 
 function renderizarAdmin() {
+    // Categorias
     document.getElementById('listaCategorias').innerHTML = categorias.length === 0
         ? '<div style="color:#999;font-size:13px">Nenhuma categoria</div>'
-        : categorias.map(c => `<div class="admin-item"><span>${c.icone} ${c.nome}</span><button class="btn-excluir" onclick="excluirCategoria('${c.id}')">🗑️</button></div>`).join('');
+        : categorias.map(c => `<div class="admin-item"><span>${c.icone || ''} ${c.nome}</span><button class="btn-excluir" onclick="excluirCategoria('${c.id}')">🗑️</button></div>`).join('');
+
+    // Atividades
     document.getElementById('listaAtividadesAdmin').innerHTML = atividades.length === 0
         ? '<div style="color:#999;font-size:13px">Nenhuma atividade</div>'
         : atividades.map(a => {
             const cat = categorias.find(c => c.id === a.categoria_id);
-            return `<div class="admin-item"><span>${cat ? cat.icone : ''} ${a.nome}</span><button class="btn-excluir" onclick="excluirAtividade('${a.id}')">🗑️</button></div>`;
+            const setor = setores.find(s => s.id === a.setor_id);
+            const label = setor ? `${cat?.icone || ''} ${cat?.nome} › ${setor.icone || ''} ${setor.nome} — ${a.nome}`
+                                : `${cat?.icone || ''} ${cat?.nome || '?'} — ${a.nome}`;
+            return `<div class="admin-item"><span>${label}</span><button class="btn-excluir" onclick="excluirAtividade('${a.id}')">🗑️</button></div>`;
         }).join('');
-    const selCat = document.getElementById('categoriaNovaAtividade');
-    selCat.innerHTML = '<option value="">Selecione a categoria</option>' +
-        categorias.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
-    const selAt = document.getElementById('atividadeChecklist');
-    selAt.innerHTML = '<option value="">Selecione a atividade</option>' +
+
+    // Selects de categoria
+    const optsCat = '<option value="">Selecione a categoria</option>' +
+        categorias.map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
+    document.getElementById('categoriaNovaAtividade').innerHTML = optsCat;
+    document.getElementById('filtroCategoriaStor').innerHTML = optsCat;
+
+    // Selects de atividade
+    const optsAt = '<option value="">Selecione a atividade</option>' +
         atividades.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
-    const selCT = document.getElementById('atividadeCamposTexto');
-    selCT.innerHTML = '<option value="">Selecione a atividade</option>' +
-        atividades.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
+    document.getElementById('atividadeChecklist').innerHTML = optsAt;
+    document.getElementById('atividadeCamposTexto').innerHTML = optsAt;
+
+    // Setores admin
+    carregarSetoresAdmin();
 }
 
+// =============================================
+// SETORES — ADMIN
+// =============================================
+function carregarSetoresAdmin() {
+    const categoriaId = document.getElementById('filtroCategoriaStor').value;
+    const container = document.getElementById('listaSetoresAdmin');
+    if (!categoriaId) { container.innerHTML = '<div style="color:#999;font-size:13px">Selecione uma categoria</div>'; return; }
+    const setoresDaCategoria = setores
+        .filter(s => s.categoria_id === categoriaId)
+        .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    container.innerHTML = setoresDaCategoria.length === 0
+        ? '<div style="color:#999;font-size:13px">Nenhum setor nesta categoria</div>'
+        : setoresDaCategoria.map(s => `
+            <div class="admin-item">
+                <span>${s.icone || ''} ${s.nome}</span>
+                <button class="btn-excluir" onclick="excluirSetor('${s.id}')">🗑️</button>
+            </div>`).join('');
+}
+
+async function adicionarSetor() {
+    const categoriaId = document.getElementById('filtroCategoriaStor').value;
+    const icone = document.getElementById('novoIconeSetor').value.trim();
+    const nome  = document.getElementById('novoNomeSetor').value.trim();
+    if (!categoriaId) { mostrarToast('Selecione a categoria', true); return; }
+    if (!nome) { mostrarToast('Preencha o nome do setor', true); return; }
+    const ordemAtual = setores.filter(s => s.categoria_id === categoriaId).length;
+    try {
+        const novo = await db.inserir('setores', { categoria_id: categoriaId, nome, icone, ordem: ordemAtual });
+        setores.push(novo);
+        document.getElementById('novoIconeSetor').value = '';
+        document.getElementById('novoNomeSetor').value = '';
+        carregarSetoresAdmin();
+        // Atualiza select de setores na nova atividade caso a categoria seja a mesma
+        atualizarSetoresNovaAtividade();
+        renderizarCalendarioGeral();
+        mostrarToast(`✅ Setor "${nome}" adicionado!`);
+    } catch(e) { mostrarToast('Erro ao adicionar setor', true); console.error(e); }
+}
+
+async function excluirSetor(id) {
+    const setor = setores.find(s => s.id === id);
+    const atvsVinculadas = atividades.filter(a => a.setor_id === id).length;
+    if (atvsVinculadas > 0) {
+        mostrarToast(`Não é possível excluir: ${atvsVinculadas} atividade(s) vinculada(s) a este setor`, true);
+        return;
+    }
+    if (!confirm(`Excluir setor "${setor?.nome}"?`)) return;
+    try {
+        await db.deletar('setores', id);
+        setores = setores.filter(s => s.id !== id);
+        carregarSetoresAdmin();
+        atualizarSetoresNovaAtividade();
+        renderizarCalendarioGeral();
+        mostrarToast('Setor excluído');
+    } catch(e) { mostrarToast('Erro ao excluir setor', true); }
+}
+
+// Atualiza o select de setor ao cadastrar nova atividade
+function atualizarSetoresNovaAtividade() {
+    const categoriaId = document.getElementById('categoriaNovaAtividade').value;
+    const selSetor = document.getElementById('setorNovaAtividade');
+    if (!categoriaId) { selSetor.classList.add('hidden'); return; }
+    const setoresDaCategoria = setores.filter(s => s.categoria_id === categoriaId);
+    if (setoresDaCategoria.length === 0) {
+        selSetor.classList.add('hidden');
+        return;
+    }
+    selSetor.classList.remove('hidden');
+    selSetor.innerHTML = '<option value="">Sem setor (geral)</option>' +
+        setoresDaCategoria
+            .sort((a, b) => (a.ordem || 0) - (b.ordem || 0))
+            .map(s => `<option value="${s.id}">${s.icone || ''} ${s.nome}</option>`).join('');
+}
+
+// =============================================
+// ATIVIDADES — ADMIN
+// =============================================
 async function adicionarCategoria() {
     const icone = document.getElementById('novoIconeCategoria').value.trim();
     const nome = document.getElementById('novoNomeCategoria').value.trim();
@@ -1010,11 +1237,12 @@ async function adicionarCategoria() {
 }
 
 async function excluirCategoria(id) {
-    if (!confirm('Excluir esta categoria?')) return;
+    if (!confirm('Excluir esta categoria e todos seus setores e atividades?')) return;
     try {
         await db.deletar('categorias', id);
         categorias = categorias.filter(c => c.id !== id);
         atividades = atividades.filter(a => a.categoria_id !== id);
+        setores    = setores.filter(s => s.categoria_id !== id);  // NOVO
         renderizarAdmin(); renderizarMenuCategorias(); renderizarCalendarioGeral();
         mostrarToast('Categoria excluída');
     } catch(e) { mostrarToast('Erro ao excluir', true); }
@@ -1022,14 +1250,21 @@ async function excluirCategoria(id) {
 
 async function adicionarAtividade() {
     const categoriaId = document.getElementById('categoriaNovaAtividade').value;
-    const nome = document.getElementById('novoNomeAtividade').value.trim();
-    const frequencia = document.getElementById('novaFrequencia').value.trim();
+    const setorId     = document.getElementById('setorNovaAtividade').value || null;
+    const nome        = document.getElementById('novoNomeAtividade').value.trim();
+    const frequencia  = document.getElementById('novaFrequencia').value.trim();
     const usaColmeias = document.getElementById('novaUsaColmeias').checked;
     const usaChecklist = document.getElementById('novaUsaChecklist').checked;
     if (!categoriaId) { mostrarToast('Selecione a categoria', true); return; }
     if (!nome) { mostrarToast('Preencha o nome', true); return; }
     try {
-        const nova = await db.inserir('atividades', { categoria_id: categoriaId, nome, frequencia, usa_colmeias: usaColmeias, usa_checklist: usaChecklist });
+        const nova = await db.inserir('atividades', {
+            categoria_id: categoriaId,
+            setor_id: setorId,              // NOVO
+            nome, frequencia,
+            usa_colmeias: usaColmeias,
+            usa_checklist: usaChecklist
+        });
         atividades.push(nova);
         document.getElementById('novoNomeAtividade').value = '';
         document.getElementById('novaFrequencia').value = '';
@@ -1132,6 +1367,7 @@ async function excluirCampoTexto(id) {
         mostrarToast('Campo excluído');
     } catch(e) { mostrarToast('Erro ao excluir campo', true); }
 }
+
 // =============================================
 // RELATÓRIO DE AÇÕES
 // =============================================
@@ -1207,12 +1443,9 @@ function gerarRelatorioAcoes() {
 function imprimirRelatorioAcoes() {
     const conteudo = document.getElementById('conteudoImpressaoAcoes');
     if (!conteudo) { mostrarToast('Gere o relatório primeiro', true); return; }
-
     const janela = window.open('', '_blank');
     janela.document.write(`
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
+        <!DOCTYPE html><html lang="pt-BR"><head>
             <meta charset="UTF-8">
             <title>Relatório de Ações — Chácara Alternativa</title>
             <style>
@@ -1228,17 +1461,17 @@ function imprimirRelatorioAcoes() {
                 .tag-colmeia { background: #f1f8e9; border: 1px solid #c5e1a5; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
                 @media print { body { padding: 16px; } }
             </style>
-        </head>
-        <body>${conteudo.innerHTML}</body>
-        </html>
+        </head><body>${conteudo.innerHTML}</body></html>
     `);
     janela.document.close();
     janela.print();
 }
+
 function abrirVistoriaRapida(colmeiaId) {
     abrirDetalheColmeia(colmeiaId);
     setTimeout(() => abrirFormVistoria(colmeiaId), 300);
 }
+
 function abrirModalNovaVistoria() {
     const ativas = colmeias.filter(c => (c.status || 'ativa') === 'ativa');
     if (ativas.length === 0) { mostrarToast('Nenhuma colmeia ativa cadastrada', true); return; }
@@ -1266,13 +1499,10 @@ function confirmarNovaVistoria() {
         setTimeout(() => abrirFormVistoria(colmeiaId), 400);
     }, 300);
 }
-// =============================================
-// ESTOQUE
-// =============================================
-let estoqueItens = [];
-let estoqueMovimentacoes = [];
-let categoriaSelecionadaEstoque = null;
 
+// =============================================
+// ESTOQUE — COM SUPORTE A SETORES
+// =============================================
 async function carregarEstoque() {
     estoqueItens = await db.get('estoque_itens');
     estoqueMovimentacoes = await db.get('estoque_movimentacoes');
@@ -1291,12 +1521,55 @@ function renderizarAbasEstoque() {
 
 function selecionarCategoriaEstoque(categoriaId) {
     categoriaSelecionadaEstoque = categorias.find(c => c.id === categoriaId);
+    setorSelecionadoEstoque = null;
     renderizarAbasEstoque();
-    renderizarTabelaEstoque();
+
+    // Verifica se a categoria tem setores
+    const setoresDaCategoria = setores
+        .filter(s => s.categoria_id === categoriaId)
+        .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+
+    const containerSetores = document.getElementById('containerAbasSetorEstoque');
+    const abasSetorEl = document.getElementById('abasSetorEstoque');
+
+    if (setoresDaCategoria.length > 0) {
+        setorSelecionadoEstoque = setoresDaCategoria[0]; // seleciona o primeiro
+        containerSetores.classList.remove('hidden');
+        renderizarAbasSetorEstoque(setoresDaCategoria);
+    } else {
+        containerSetores.classList.add('hidden');
+        abasSetorEl.innerHTML = '';
+    }
+
     document.getElementById('tituloEstoqueCategoria').textContent =
-        `${categoriaSelecionadaEstoque.icone || '📦'} ${categoriaSelecionadaEstoque.nome}`;
+        setorSelecionadoEstoque
+            ? `${categoriaSelecionadaEstoque.icone || '📦'} ${categoriaSelecionadaEstoque.nome} › ${setorSelecionadoEstoque.icone || ''} ${setorSelecionadoEstoque.nome}`
+            : `${categoriaSelecionadaEstoque.icone || '📦'} ${categoriaSelecionadaEstoque.nome}`;
+
     document.getElementById('btnNovoItemEstoque').classList.remove('hidden');
     fecharFormEstoque();
+    renderizarTabelaEstoque();
+}
+
+function renderizarAbasSetorEstoque(setoresDaCategoria) {
+    const abasSetorEl = document.getElementById('abasSetorEstoque');
+    abasSetorEl.innerHTML = setoresDaCategoria.map(s => `
+        <button class="aba-setor ${setorSelecionadoEstoque?.id === s.id ? 'ativa' : ''}"
+            onclick="selecionarSetorEstoque('${s.id}')">
+            ${s.icone || ''} ${s.nome}
+        </button>
+    `).join('');
+}
+
+function selecionarSetorEstoque(setorId) {
+    setorSelecionadoEstoque = setores.find(s => s.id === setorId);
+    const setoresDaCategoria = setores
+        .filter(s => s.categoria_id === categoriaSelecionadaEstoque.id)
+        .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    renderizarAbasSetorEstoque(setoresDaCategoria);
+    document.getElementById('tituloEstoqueCategoria').textContent =
+        `${categoriaSelecionadaEstoque.icone || '📦'} ${categoriaSelecionadaEstoque.nome} › ${setorSelecionadoEstoque.icone || ''} ${setorSelecionadoEstoque.nome}`;
+    renderizarTabelaEstoque();
 }
 
 function renderizarTabelaEstoque() {
@@ -1305,9 +1578,15 @@ function renderizarTabelaEstoque() {
         container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Selecione uma categoria acima.</p>';
         return;
     }
-    const itens = estoqueItens.filter(i => i.categoria_id === categoriaSelecionadaEstoque.id);
+
+    // Filtra por categoria e, se houver setor selecionado, por setor também
+    let itens = estoqueItens.filter(i => i.categoria_id === categoriaSelecionadaEstoque.id);
+    if (setorSelecionadoEstoque) {
+        itens = itens.filter(i => i.setor_id === setorSelecionadoEstoque.id);
+    }
+
     if (itens.length === 0) {
-        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Nenhum item cadastrado nesta categoria.</p>';
+        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Nenhum item cadastrado nesta categoria/setor.</p>';
         return;
     }
     container.innerHTML = `
@@ -1375,6 +1654,7 @@ async function salvarItemEstoque() {
     const id = document.getElementById('estoqueItemEditandoId').value;
     const dados = {
         categoria_id: categoriaSelecionadaEstoque.id,
+        setor_id: setorSelecionadoEstoque ? setorSelecionadoEstoque.id : null,  // NOVO
         nome: document.getElementById('estoqueItemNome').value.trim(),
         quantidade_atual: parseFloat(document.getElementById('estoqueItemQtdAtual').value) || 0,
         quantidade_minima: parseFloat(document.getElementById('estoqueItemQtdMinima').value) || 0,
@@ -1434,10 +1714,7 @@ async function confirmarEntrada() {
         await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
         item.quantidade_atual = novaQtd;
         const mov = await db.inserir('estoque_movimentacoes', {
-            item_id: itemId,
-            tipo: 'entrada',
-            quantidade: qtd,
-            motivo,
+            item_id: itemId, tipo: 'entrada', quantidade: qtd, motivo,
             observacao: observacao || null,
             usuario_id: usuarioLogado ? usuarioLogado.id : null
         });
@@ -1455,6 +1732,44 @@ async function registrarSaidaEstoqueVistoria(vistoriaId, colmeiaId, acoesSelecio
     const dataHoje = new Date().toLocaleDateString('pt-BR');
     const motivo = `Vistoria colmeia ${colmeia ? colmeia.codigo : colmeiaId} — ${dataHoje} — Ações: ${acoesSelecionadas.join(', ')}`;
     console.log('Saída automática registrada:', motivo);
+}
+
+function abrirModalSaida(itemId) {
+    document.getElementById('saidaItemId').value = itemId;
+    document.getElementById('saidaQtd').value = '';
+    document.getElementById('saidaMotivo').value = '';
+    document.getElementById('saidaObservacao').value = '';
+    document.getElementById('modalSaidaEstoque').classList.remove('hidden');
+}
+
+function fecharModalSaida() {
+    document.getElementById('modalSaidaEstoque').classList.add('hidden');
+}
+
+async function confirmarSaida() {
+    const itemId = document.getElementById('saidaItemId').value;
+    const qtd = parseFloat(document.getElementById('saidaQtd').value);
+    const motivo = document.getElementById('saidaMotivo').value.trim();
+    const observacao = document.getElementById('saidaObservacao').value.trim();
+    if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
+    if (!motivo) { mostrarToast('Informe o motivo da saída', true); return; }
+    try {
+        const item = estoqueItens.find(i => i.id === itemId);
+        if (qtd > item.quantidade_atual) { mostrarToast('Quantidade insuficiente em estoque', true); return; }
+        const novaQtd = item.quantidade_atual - qtd;
+        await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
+        item.quantidade_atual = novaQtd;
+        const mov = await db.inserir('estoque_movimentacoes', {
+            item_id: itemId, tipo: 'saida', quantidade: qtd, motivo,
+            observacao: observacao || null,
+            usuario_id: usuarioLogado ? usuarioLogado.id : null
+        });
+        estoqueMovimentacoes.push(mov);
+        fecharModalSaida();
+        renderizarTabelaEstoque();
+        renderizarAlertaEstoque();
+        mostrarToast(`✅ Saída de ${qtd} ${item.unidade} registrada!`);
+    } catch(e) { mostrarToast('Erro ao registrar saída', true); console.error(e); }
 }
 
 async function verHistoricoItem(itemId) {
@@ -1494,61 +1809,21 @@ function renderizarAlertaEstoque() {
     const container = document.getElementById('alertaEstoque');
     if (!container) return;
     const itensBaixos = estoqueItens.filter(i => i.quantidade_atual <= i.quantidade_minima);
-    if (itensBaixos.length === 0) {
-        container.innerHTML = '';
-        return;
-    }
+    if (itensBaixos.length === 0) { container.innerHTML = ''; return; }
     container.innerHTML = `
         <div class="card alerta-estoque-card">
             <h3>⚠️ Estoque Baixo</h3>
             <p style="font-size:13px;color:#888;margin-bottom:12px">${itensBaixos.length} item(s) abaixo da quantidade mínima</p>
             ${itensBaixos.map(item => {
                 const cat = categorias.find(c => c.id === item.categoria_id);
+                const setor = setores.find(s => s.id === item.setor_id);
+                const label = setor
+                    ? `${cat?.icone || '📦'} ${cat?.nome} › ${setor.icone || ''} ${setor.nome} — <b>${item.nome}</b>`
+                    : `${cat?.icone || '📦'} ${cat?.nome || ''} — <b>${item.nome}</b>`;
                 return `<div class="alerta-estoque-item">
-                    <span>${cat ? `${cat.icone} ${cat.nome}` : '📦'} — <b>${item.nome}</b></span>
+                    <span>${label}</span>
                     <span style="color:#c62828;font-weight:600">${item.quantidade_atual} / ${item.quantidade_minima} ${item.unidade}</span>
                 </div>`;
             }).join('')}
         </div>`;
-}
-// SAÍDA MANUAL
-function abrirModalSaida(itemId) {
-    document.getElementById('saidaItemId').value = itemId;
-    document.getElementById('saidaQtd').value = '';
-    document.getElementById('saidaMotivo').value = '';
-    document.getElementById('saidaObservacao').value = '';
-    document.getElementById('modalSaidaEstoque').classList.remove('hidden');
-}
-
-function fecharModalSaida() {
-    document.getElementById('modalSaidaEstoque').classList.add('hidden');
-}
-
-async function confirmarSaida() {
-    const itemId = document.getElementById('saidaItemId').value;
-    const qtd = parseFloat(document.getElementById('saidaQtd').value);
-    const motivo = document.getElementById('saidaMotivo').value.trim();
-    const observacao = document.getElementById('saidaObservacao').value.trim();
-    if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
-    if (!motivo) { mostrarToast('Informe o motivo da saída', true); return; }
-    try {
-        const item = estoqueItens.find(i => i.id === itemId);
-        if (qtd > item.quantidade_atual) { mostrarToast('Quantidade insuficiente em estoque', true); return; }
-        const novaQtd = item.quantidade_atual - qtd;
-        await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
-        item.quantidade_atual = novaQtd;
-        const mov = await db.inserir('estoque_movimentacoes', {
-            item_id: itemId,
-            tipo: 'saida',
-            quantidade: qtd,
-            motivo,
-            observacao: observacao || null,
-            usuario_id: usuarioLogado ? usuarioLogado.id : null
-        });
-        estoqueMovimentacoes.push(mov);
-        fecharModalSaida();
-        renderizarTabelaEstoque();
-        renderizarAlertaEstoque();
-        mostrarToast(`✅ Saída de ${qtd} ${item.unidade} registrada!`);
-    } catch(e) { mostrarToast('Erro ao registrar saída', true); console.error(e); }
 }

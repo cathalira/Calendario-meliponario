@@ -73,11 +73,11 @@
                 <div class="menu-secao">SISTEMA</div>
                 <a href="#" class="menu-item" onclick="mostrarTela('colmeias')">
                     🐝 <span>Colmeias</span>
-                    </a>
-                    <a href="#" class="menu-item" onclick="mostrarTela('acoes')">
-                        🐝 <span>Rel. Ações</span>
                 </a>
-<a href="#" class="menu-item" onclick="mostrarTela('estoque')">
+                <a href="#" class="menu-item" onclick="mostrarTela('acoes')">
+                    🐝 <span>Rel. Ações</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('estoque')">
                     📦 <span>Estoque</span>
                 </a>
                 <a href="#" class="menu-item" onclick="mostrarTela('relatorios')">
@@ -123,7 +123,7 @@
                         <table id="tabelaCalendario">
                             <thead>
                                 <tr>
-                                    <th>Categoria</th>
+                                    <th>Categoria / Setor</th>
                                     <th>Jun</th><th>Jul</th><th>Ago</th>
                                     <th>Set</th><th>Out</th><th>Nov</th>
                                     <th>Dez</th><th>Jan</th><th>Fev</th>
@@ -138,12 +138,17 @@
                 <div id="alertaEstoque"></div>
             </div>
 
-            <!-- TELA: CATEGORIA -->
+            <!-- TELA: CATEGORIA (com suporte a abas de setor) -->
             <div id="tela-categoria" class="tela">
                 <div class="tela-header">
                     <button class="btn-voltar" onclick="mostrarTela('inicio')">← Voltar</button>
                     <h1 id="tituloCategoriaAtual"></h1>
                 </div>
+                <!-- Abas de setor (só aparece se a categoria tiver setores) -->
+                <div id="containerAbasSetor" class="hidden">
+                    <div id="abasSetor" class="abas-setor"></div>
+                </div>
+                <!-- Lista de atividades (filtrada por setor quando aplicável) -->
                 <div id="listaAtividades" class="lista-atividades"></div>
             </div>
 
@@ -206,9 +211,9 @@
                             <input type="text" id="colmeiaLocalizacao" placeholder="Ex: Meliponário A">
                         </div>
                         <div class="form-campo">
-                    <label>Origem</label>
-                    <input type="text" id="colmeiaOrigem" placeholder="Ex: Captura, Divisão, Compra">
-                </div>
+                            <label>Origem</label>
+                            <input type="text" id="colmeiaOrigem" placeholder="Ex: Captura, Divisão, Compra">
+                        </div>
                         <div class="form-campo">
                             <label>Status</label>
                             <select id="colmeiaStatus">
@@ -274,6 +279,7 @@
                     <h1>⚙️ Administração</h1>
                 </div>
                 <div class="admin-grid">
+                    <!-- CARD: CATEGORIAS -->
                     <div class="card">
                         <h3>📁 Categorias</h3>
                         <div id="listaCategorias" class="admin-lista"></div>
@@ -286,13 +292,43 @@
                             <button onclick="adicionarCategoria()">➕ Adicionar</button>
                         </div>
                     </div>
+
+                    <!-- CARD: SETORES (NOVO) -->
+                    <div class="card">
+                        <h3>🗂️ Setores</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">
+                            Setores dividem uma categoria em sub-áreas (ex: Oficina → Marcenaria, Serralheria).
+                            Categorias sem setores funcionam normalmente.
+                        </p>
+                        <div class="form-grupo" style="margin-bottom:12px">
+                            <select id="filtroCategoriaStor" onchange="carregarSetoresAdmin()">
+                                <option value="">Selecione a categoria</option>
+                            </select>
+                        </div>
+                        <div id="listaSetoresAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Setor</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoIconeSetor" placeholder="Ícone (ex: 🪵)" maxlength="4">
+                            <input type="text" id="novoNomeSetor" placeholder="Nome do setor">
+                            <button onclick="adicionarSetor()">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- CARD: ATIVIDADES -->
                     <div class="card">
                         <h3>📋 Atividades</h3>
                         <div id="listaAtividadesAdmin" class="admin-lista"></div>
                         <hr>
                         <h4>Nova Atividade</h4>
                         <div class="form-grupo">
-                            <select id="categoriaNovaAtividade"><option value="">Selecione a categoria</option></select>
+                            <select id="categoriaNovaAtividade" onchange="atualizarSetoresNovaAtividade()">
+                                <option value="">Selecione a categoria</option>
+                            </select>
+                            <!-- Setor opcional, aparece quando categoria tem setores -->
+                            <select id="setorNovaAtividade" class="hidden">
+                                <option value="">Sem setor (geral)</option>
+                            </select>
                             <input type="text" id="novoNomeAtividade" placeholder="Nome da atividade">
                             <input type="text" id="novaFrequencia" placeholder="Frequência (ex: 2x semana)">
                             <div class="check-opcoes">
@@ -302,10 +338,14 @@
                             <button onclick="adicionarAtividade()">➕ Adicionar</button>
                         </div>
                     </div>
+
+                    <!-- CARD: CAMPOS DE TEXTO -->
                     <div class="card">
                         <h3>📝 Campos de Texto Livre</h3>
                         <div class="form-grupo">
-                            <select id="atividadeCamposTexto" onchange="carregarCamposTextoAdmin()"><option value="">Selecione a atividade</option></select>
+                            <select id="atividadeCamposTexto" onchange="carregarCamposTextoAdmin()">
+                                <option value="">Selecione a atividade</option>
+                            </select>
                         </div>
                         <div id="listaCamposTextoAdmin" class="admin-lista"></div>
                         <hr>
@@ -315,10 +355,14 @@
                             <button onclick="adicionarCampoTexto()">➕ Adicionar</button>
                         </div>
                     </div>
+
+                    <!-- CARD: CHECKLIST -->
                     <div class="card">
                         <h3>✅ Itens do Checklist</h3>
                         <div class="form-grupo">
-                            <select id="atividadeChecklist" onchange="carregarChecklistAdmin()"><option value="">Selecione a atividade</option></select>
+                            <select id="atividadeChecklist" onchange="carregarChecklistAdmin()">
+                                <option value="">Selecione a atividade</option>
+                            </select>
                         </div>
                         <div id="listaChecklistAdmin" class="admin-lista"></div>
                         <hr>
@@ -366,32 +410,38 @@
                     <div id="tabelaUsuarios"></div>
                 </div>
             </div>
-                <!-- TELA: RELATÓRIO DE AÇÕES -->
-<div id="tela-acoes" class="tela">
-    <div class="tela-header">
-        <h1>🐝 Relatório de Ações</h1>
-        <button onclick="imprimirRelatorioAcoes()">🖨️ Imprimir / Salvar PDF</button>
-    </div>
-    <div class="filtros-relatorio card">
-        <div class="filtro-grupo">
-            <label>De:</label>
-            <input type="date" id="filtroAcoesDE">
-        </div>
-        <div class="filtro-grupo">
-            <label>Até:</label>
-            <input type="date" id="filtroAcoesATE">
-        </div>
-        <button onclick="gerarRelatorioAcoes()">🔍 Buscar</button>
-    </div>
-    <div id="resultadoAcoes"></div>
-</div>
-<!-- TELA: ESTOQUE -->
+
+            <!-- TELA: RELATÓRIO DE AÇÕES -->
+            <div id="tela-acoes" class="tela">
+                <div class="tela-header">
+                    <h1>🐝 Relatório de Ações</h1>
+                    <button onclick="imprimirRelatorioAcoes()">🖨️ Imprimir / Salvar PDF</button>
+                </div>
+                <div class="filtros-relatorio card">
+                    <div class="filtro-grupo">
+                        <label>De:</label>
+                        <input type="date" id="filtroAcoesDE">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Até:</label>
+                        <input type="date" id="filtroAcoesATE">
+                    </div>
+                    <button onclick="gerarRelatorioAcoes()">🔍 Buscar</button>
+                </div>
+                <div id="resultadoAcoes"></div>
+            </div>
+
+            <!-- TELA: ESTOQUE -->
             <div id="tela-estoque" class="tela">
                 <div class="tela-header">
                     <h1>📦 Estoque</h1>
                 </div>
                 <div class="card estoque-categorias">
                     <div id="abasCategoriaEstoque" class="abas-estoque"></div>
+                    <!-- Abas de setor dentro do estoque (aparece quando categoria tem setores) -->
+                    <div id="containerAbasSetorEstoque" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cinza-borda)">
+                        <div id="abasSetorEstoque" class="abas-setor"></div>
+                    </div>
                 </div>
                 <div id="formEstoqueItem" class="card hidden">
                     <h3 id="tituloFormEstoque">Novo Item</h3>
@@ -426,6 +476,8 @@
                     </div>
                     <div id="tabelaEstoque"></div>
                 </div>
+
+                <!-- MODAL ENTRADA -->
                 <div id="modalEntradaEstoque" class="modal hidden">
                     <div class="modal-box">
                         <h3>📥 Registrar Entrada</h3>
@@ -448,6 +500,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- MODAL SAÍDA -->
                 <div id="modalSaidaEstoque" class="modal hidden">
                     <div class="modal-box">
@@ -471,6 +524,8 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MODAL HISTÓRICO -->
                 <div id="modalHistoricoEstoque" class="modal hidden">
                     <div class="modal-box" style="width:520px;max-width:95vw">
                         <h3 id="tituloHistoricoEstoque">Histórico</h3>
@@ -480,23 +535,28 @@
                         </div>
                     </div>
                 </div>
-            </div>        
-</main>
+            </div>
+
+        </main>
     </div>
+
     <!-- MODAL NOVA VISTORIA -->
-<div id="modalNovaVistoria" class="modal hidden">
-    <div class="modal-box">
-        <h3>📋 Nova Vistoria</h3>
-        <p>Selecione a colmeia:</p>
-        <input type="text" id="selectColmeiaVistoria" list="listaColmeias" placeholder="Digite ou selecione o código..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:16px">
-        <datalist id="listaColmeias"></datalist>
-        <div class="modal-botoes">
-            <button onclick="fecharModalNovaVistoria()">Cancelar</button>
-            <button onclick="confirmarNovaVistoria()" class="btn-primario">Abrir Vistoria</button>
+    <div id="modalNovaVistoria" class="modal hidden">
+        <div class="modal-box">
+            <h3>📋 Nova Vistoria</h3>
+            <p>Selecione a colmeia:</p>
+            <input type="text" id="selectColmeiaVistoria" list="listaColmeias"
+                placeholder="Digite ou selecione o código..."
+                style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:16px">
+            <datalist id="listaColmeias"></datalist>
+            <div class="modal-botoes">
+                <button onclick="fecharModalNovaVistoria()">Cancelar</button>
+                <button onclick="confirmarNovaVistoria()" class="btn-primario">Abrir Vistoria</button>
+            </div>
         </div>
     </div>
-</div>
-<!-- MODAL DE SENHA ADMIN -->
+
+    <!-- MODAL DE SENHA ADMIN -->
     <div id="modalSenha" class="modal hidden">
         <div class="modal-box">
             <h3>🔒 Área Administrativa</h3>
@@ -509,7 +569,7 @@
         </div>
     </div>
 
-<!-- TOAST -->
+    <!-- TOAST -->
     <div id="toast" class="toast hidden"></div>
 
     <script src="supabase.js"></script>

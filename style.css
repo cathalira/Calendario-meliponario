@@ -1,610 +1,578 @@
-/* ===========================
-   RESET E BASE
-=========================== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-    --verde-escuro: #1b5e20;
-    --verde-medio: #2e7d32;
-    --verde-claro: #4caf50;
-    --verde-suave: #e8f5e9;
-    --verde-hover: #c8e6c9;
-    --cinza-fundo: #f4f6f5;
-    --cinza-borda: #dde3dd;
-    --cinza-texto: #555;
-    --branco: #ffffff;
-    --sombra: 0 2px 12px rgba(0,0,0,0.08);
-    --raio: 10px;
-    --menu-largura: 220px;
-}
-
-body { font-family: 'Segoe UI', sans-serif; background: var(--cinza-fundo); color: #222; }
-
-/* ===========================
-   TELA DE LOGIN
-=========================== */
-.tela-login {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1b5e20, #4caf50);
-}
-
-.login-box {
-    background: white;
-    border-radius: 16px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    text-align: center;
-}
-
-.login-logo { font-size: 48px; margin-bottom: 10px; }
-
-.login-box h1 { font-size: 22px; color: var(--verde-escuro); margin-bottom: 4px; }
-
-.login-box > p { font-size: 13px; color: var(--cinza-texto); margin-bottom: 24px; }
-
-.btn-login {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    background: var(--verde-medio);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.2s;
-}
-
-.btn-login:hover { background: var(--verde-escuro); }
-
-.login-link { font-size: 13px; color: var(--cinza-texto); margin-top: 16px; }
-.login-link a { color: var(--verde-medio); text-decoration: none; font-weight: 600; }
-
-/* ===========================
-   LAYOUT PRINCIPAL
-=========================== */
-#sistemaPrincipal { display: flex; min-height: 100vh; }
-
-#menuLateral {
-    width: var(--menu-largura);
-    min-height: 100vh;
-    background: var(--verde-escuro);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0;
-    z-index: 100;
-}
-
-.menu-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.menu-logo { font-size: 28px; }
-.menu-titulo { color: white; font-size: 14px; font-weight: 600; line-height: 1.3; }
-
-nav { flex: 1; padding: 10px 0; }
-
-.menu-secao {
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    padding: 12px 16px 4px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-}
-
-.menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
-.menu-item.ativo { background: var(--verde-claro); color: white; font-weight: 600; }
-
-.menu-footer {
-    padding: 12px 16px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.usuario-menu {
-    color: rgba(255,255,255,0.8);
-    font-size: 13px;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.btn-sair {
-    width: 100%;
-    padding: 7px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    text-align: center;
-}
-
-.btn-sair:hover { background: rgba(255,255,255,0.2); }
-
-/* ===========================
-   ÁREA PRINCIPAL
-=========================== */
-#areaPrincipal { margin-left: var(--menu-largura); flex: 1; padding: 24px; min-height: 100vh; }
-
-.tela { display: none; }
-.tela.ativa { display: block; }
-
-.tela-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.tela-header h1 { font-size: 22px; color: var(--verde-escuro); flex: 1; }
-
-/* ===========================
-   CARDS
-=========================== */
-.card {
-    background: var(--branco);
-    border-radius: var(--raio);
-    padding: 20px;
-    box-shadow: var(--sombra);
-    margin-bottom: 20px;
-}
-
-/* ===========================
-   CALENDÁRIO GERAL
-=========================== */
-.tabela-wrapper { overflow-x: auto; }
-
-table { width: 100%; border-collapse: collapse; }
-
-th, td { border: 1px solid var(--cinza-borda); padding: 10px 8px; text-align: center; font-size: 13px; }
-
-th { background: var(--verde-suave); color: var(--verde-escuro); font-weight: 600; }
-
-td:first-child { text-align: left; padding-left: 14px; font-weight: 500; white-space: nowrap; }
-
-.linha-categoria { cursor: pointer; transition: background 0.2s; }
-.linha-categoria:hover { background: var(--verde-suave); }
-
-/* ===========================
-   RESUMO
-=========================== */
-.resumo-geral {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-top: 8px;
-}
-
-.resumo-card {
-    background: var(--branco);
-    border-radius: var(--raio);
-    padding: 16px 20px;
-    box-shadow: var(--sombra);
-    border-left: 4px solid var(--verde-claro);
-}
-
-.resumo-card .numero { font-size: 28px; font-weight: 700; color: var(--verde-escuro); }
-.resumo-card .label { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
-
-/* ===========================
-   ATIVIDADES
-=========================== */
-.lista-atividades {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.card-atividade {
-    background: var(--branco);
-    border-radius: var(--raio);
-    padding: 20px;
-    box-shadow: var(--sombra);
-    cursor: pointer;
-    transition: all 0.2s;
-    border-top: 4px solid var(--verde-claro);
-}
-
-.card-atividade:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-.card-atividade h3 { font-size: 15px; color: var(--verde-escuro); margin-bottom: 6px; }
-.card-atividade .frequencia { font-size: 12px; color: var(--cinza-texto); }
-.card-atividade .registros-mes { margin-top: 10px; font-size: 12px; color: var(--verde-medio); font-weight: 600; }
-
-/* ===========================
-   MINI CALENDÁRIO
-=========================== */
-.layout-atividade {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-@media (max-width: 900px) { .layout-atividade { grid-template-columns: 1fr; } }
-
-.nav-mes { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.nav-mes h2 { font-size: 16px; color: var(--verde-escuro); }
-.nav-mes button { background: var(--verde-suave); color: var(--verde-escuro); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-
-.mini-calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-
-.cal-dia-header { text-align: center; font-size: 11px; color: var(--cinza-texto); padding: 4px 0; font-weight: 600; }
-
-.cal-dia {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    border: 1px solid transparent;
-}
-
-.cal-dia:hover { background: var(--verde-suave); border-color: var(--verde-claro); }
-
-.cal-dia.tem-registro { background: var(--verde-suave); color: var(--verde-escuro); font-weight: 600; }
-
-.cal-dia.tem-registro::after {
-    content: '✓';
-    position: absolute;
-    bottom: 1px; right: 2px;
-    font-size: 8px;
-    color: var(--verde-claro);
-}
-
-.cal-dia.hoje { border: 2px solid var(--verde-claro); font-weight: 700; }
-.cal-dia.selecionado { background: var(--verde-medio); color: white; }
-.cal-dia.vazio { cursor: default; }
-
-.badge-frequencia {
-    background: var(--verde-suave);
-    color: var(--verde-escuro);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-}
-
-/* ===========================
-   FORMULÁRIO REGISTRO
-=========================== */
-.formulario-registro h3 { color: var(--verde-escuro); margin-bottom: 16px; font-size: 16px; }
-
-.form-campo { margin-bottom: 14px; }
-
-.form-campo label { display: block; font-size: 13px; font-weight: 600; color: var(--cinza-texto); margin-bottom: 5px; }
-
-.form-campo input,
-.form-campo textarea,
-.form-campo select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    transition: border 0.2s;
-}
-
-.form-campo input:focus,
-.form-campo textarea:focus { outline: none; border-color: var(--verde-claro); }
-
-.checklist-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
-}
-
-.checklist-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--verde-claro); }
-
-.placeholder-formulario { text-align: center; color: var(--cinza-texto); padding: 40px 20px; font-size: 14px; }
-
-/* ===========================
-   HISTÓRICO
-=========================== */
-.historico-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-}
-
-.historico-item:last-child { border-bottom: none; }
-.historico-data { font-weight: 600; color: var(--verde-escuro); }
-.historico-responsavel { color: var(--cinza-texto); }
-.historico-vazio { color: var(--cinza-texto); font-size: 13px; text-align: center; padding: 20px; }
-
-/* ===========================
-   COLMEIAS
-=========================== */
-.filtro-colmeias { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-
-.filtro-colmeias input { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-.filtro-colmeias select { padding: 8px 12px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-}
-
-.tabela-colmeias { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tabela-colmeias th { background: var(--verde-suave); padding: 10px; text-align: left; }
-.tabela-colmeias td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-.tabela-colmeias tr:hover td { background: var(--verde-suave); }
-
-.badge-status {
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.badge-ativa { background: #e8f5e9; color: #2e7d32; }
-.badge-inativa { background: #fce4ec; color: #c62828; }
-
-/* ===========================
-   RELATÓRIOS
-=========================== */
-.filtros-relatorio { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
-
-.filtro-grupo { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }
-.filtro-grupo label { font-size: 12px; font-weight: 600; color: var(--cinza-texto); }
-.filtro-grupo input, .filtro-grupo select { padding: 8px 10px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-.tabela-relatorio { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tabela-relatorio th { background: var(--verde-suave); padding: 10px; }
-.tabela-relatorio td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-.tabela-relatorio tr:hover td { background: var(--verde-suave); }
-
-/* ===========================
-   ADMINISTRAÇÃO
-=========================== */
-.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-.admin-grid .card h3 { color: var(--verde-escuro); margin-bottom: 12px; }
-.admin-grid .card h4 { color: var(--cinza-texto); font-size: 13px; margin: 12px 0 8px; }
-
-.admin-lista { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
-
-.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--cinza-fundo); border-radius: 6px; font-size: 13px; }
-
-.admin-item .btn-excluir { background: none; border: none; color: #e53935; cursor: pointer; padding: 2px 6px; font-size: 14px; }
-
-.form-inline { display: flex; gap: 8px; flex-wrap: wrap; }
-.form-inline input { flex: 1; min-width: 100px; padding: 8px 10px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-.form-grupo { display: flex; flex-direction: column; gap: 8px; }
-.form-grupo input, .form-grupo select { padding: 8px 10px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-.check-opcoes { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
-.check-opcoes label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-
-/* ===========================
-   DASHBOARD
-=========================== */
-.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
-
-.grafico-container { margin-top: 12px; }
-
-.barra-grafico {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    font-size: 13px;
-}
-
-.barra-label { width: 100px; text-align: right; color: var(--cinza-texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.barra-fundo { flex: 1; background: var(--cinza-fundo); border-radius: 4px; height: 20px; }
-
-.barra-fill { background: var(--verde-claro); border-radius: 4px; height: 20px; transition: width 0.5s; min-width: 4px; }
-
-.barra-valor { width: 30px; font-weight: 600; color: var(--verde-escuro); }
-
-.pendencia-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-.pendencia-item:last-child { border-bottom: none; }
-
-/* ===========================
-   USUÁRIOS
-=========================== */
-.tabela-usuarios { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tabela-usuarios th { background: var(--verde-suave); padding: 10px; text-align: left; }
-.tabela-usuarios td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-
-.badge-perfil { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-.badge-admin { background: #fff3e0; color: #e65100; }
-.badge-usuario { background: var(--verde-suave); color: var(--verde-escuro); }
-
-/* ===========================
-   BOTÕES
-=========================== */
-button {
-    background: var(--verde-medio);
-    color: white;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-family: inherit;
-    transition: background 0.2s;
-}
-
-button:hover { background: var(--verde-escuro); }
-
-.btn-voltar { background: var(--cinza-fundo); color: var(--verde-escuro); border: 1px solid var(--cinza-borda); font-weight: 600; }
-.btn-voltar:hover { background: var(--verde-suave); }
-
-.btn-primario { background: var(--verde-medio); color: white; }
-
-.btn-salvar { width: 100%; padding: 12px; font-size: 15px; background: var(--verde-medio); margin-top: 8px; }
-
-.btn-editar { background: #e3f2fd; color: #1565c0; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 4px; }
-.btn-excluir-tabela { background: #fce4ec; color: #c62828; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-
-.ano-selector { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.ano-selector select { padding: 6px 10px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 13px; }
-
-/* ===========================
-   MODAL
-=========================== */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
-.modal.hidden { display: none; }
-
-.modal-box { background: white; border-radius: var(--raio); padding: 28px; width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-.modal-box h3 { margin-bottom: 8px; color: var(--verde-escuro); }
-.modal-box p { font-size: 13px; color: var(--cinza-texto); margin-bottom: 14px; }
-.modal-box input { width: 100%; padding: 10px; border: 1px solid var(--cinza-borda); border-radius: 6px; font-size: 14px; margin-bottom: 16px; }
-.modal-botoes { display: flex; gap: 10px; justify-content: flex-end; }
-
-/* ===========================
-   TOAST
-=========================== */
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--verde-escuro); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 9999; }
-.toast.hidden { display: none; }
-.toast.erro { background: #c62828; }
-
-/* ===========================
-   UTILITÁRIOS
-=========================== */
-.hidden { display: none !important; }
-hr { border: none; border-top: 1px solid var(--cinza-borda); margin: 12px 0; }
-
-.loading { text-align: center; padding: 40px; color: var(--cinza-texto); font-size: 14px; }
-.spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--verde-suave); border-top-color: var(--verde-claro); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
-@keyframes spin { to { transform: rotate(360deg); } }
-/* ===========================
-   RELATÓRIO DE AÇÕES
-=========================== */
-.acao-relatorio-item {
-    margin-bottom: 16px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: var(--raio);
-    overflow: hidden;
-}
-
-.acao-relatorio-titulo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--verde-suave);
-    padding: 10px 16px;
-}
-
-.acao-sigla {
-    background: var(--verde-escuro);
-    color: white;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.acao-nome { font-weight: 600; font-size: 14px; flex: 1; color: var(--verde-escuro); }
-
-.acao-count { font-size: 12px; color: var(--cinza-texto); }
-
-.acao-colmeias-lista {
-    padding: 12px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.tag-colmeia {
-    background: #f1f8e9;
-    border: 1px solid #c5e1a5;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    color: var(--verde-escuro);
-}
-/* ===========================
-   ESTOQUE
-=========================== */
-.abas-estoque {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.aba-estoque {
-    background: var(--cinza-fundo);
-    color: var(--verde-escuro);
-    border: 1px solid var(--cinza-borda);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.aba-estoque:hover { background: var(--verde-suave); }
-
-.aba-estoque.ativa {
-    background: var(--verde-medio);
-    color: white;
-    border-color: var(--verde-medio);
-}
-
-.estoque-baixo { background: #fff8f8; }
-
-.historico-mov-item {
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.historico-mov-item:last-child { border-bottom: none; }
-
-.alerta-estoque-card {
-    border-left: 4px solid #c62828;
-    margin-top: 20px;
-}
-
-.alerta-estoque-card h3 { color: #c62828; margin-bottom: 4px; }
-
-.alerta-estoque-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-}
-
-.alerta-estoque-item:last-child { border-bottom: none; }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema da Chácara Alternativa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="telaLogin" class="tela-login">
+        <div class="login-box">
+            <div class="login-logo">🌿</div>
+            <h1>Chácara Alternativa</h1>
+            <p>Sistema de Gestão</p>
+
+            <div id="formLogin">
+                <div class="form-campo">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-campo">
+                    <label>Senha</label>
+                    <input type="password" id="loginSenha" placeholder="Sua senha">
+                </div>
+                <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+                <p class="login-link">Não tem conta? <a href="#" onclick="mostrarCadastro()">Criar conta</a></p>
+            </div>
+
+            <div id="formCadastro" class="hidden">
+                <div class="form-campo">
+                    <label>Nome completo</label>
+                    <input type="text" id="cadastroNome" placeholder="Seu nome">
+                </div>
+                <div class="form-campo">
+                    <label>Email</label>
+                    <input type="email" id="cadastroEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-campo">
+                    <label>Senha</label>
+                    <input type="password" id="cadastroSenha" placeholder="Crie uma senha">
+                </div>
+                <div class="form-campo">
+                    <label>Confirmar senha</label>
+                    <input type="password" id="cadastroConfirma" placeholder="Repita a senha">
+                </div>
+                <button class="btn-login" onclick="fazerCadastro()">Criar conta</button>
+                <p class="login-link">Já tem conta? <a href="#" onclick="mostrarLogin()">Entrar</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
+    <div id="sistemaPrincipal" class="hidden">
+
+        <!-- MENU LATERAL -->
+        <aside id="menuLateral">
+            <div class="menu-header">
+                <span class="menu-logo">🌿</span>
+                <span class="menu-titulo">Chácara<br>Alternativa</span>
+            </div>
+
+            <nav>
+                <div class="menu-secao">NAVEGAÇÃO</div>
+                <a href="#" class="menu-item ativo" onclick="mostrarTela('inicio')">
+                    🏠 <span>Início</span>
+                </a>
+
+                <div class="menu-secao">CATEGORIAS</div>
+                <div id="menuCategorias"></div>
+
+                <div class="menu-secao">SISTEMA</div>
+                <a href="#" class="menu-item" onclick="mostrarTela('colmeias')">
+                    🐝 <span>Colmeias</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('acoes')">
+                    🐝 <span>Rel. Ações</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('estoque')">
+                    📦 <span>Estoque</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('relatorios')">
+                    📊 <span>Relatórios</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('admin')">
+                    ⚙️ <span>Administração</span>
+                </a>
+                <div id="menuAdmin" class="hidden">
+                    <a href="#" class="menu-item" onclick="mostrarTela('dashboard')">
+                        📈 <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="menu-item" onclick="mostrarTela('usuarios')">
+                        👥 <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="menu-footer">
+                <div id="nomeUsuarioMenu" class="usuario-menu"></div>
+                <button class="btn-sair" onclick="fazerLogout()">Sair</button>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL -->
+        <main id="areaPrincipal">
+
+            <!-- TELA: INÍCIO -->
+            <div id="tela-inicio" class="tela ativa">
+                <div class="tela-header">
+                    <h1>📅 Calendário Geral</h1>
+                    <div class="ano-selector">
+                        <label>Ano produtivo:</label>
+                        <select id="anoProdutivo" onchange="renderizarCalendarioGeral()">
+                            <option value="2026-2027">2026–2027</option>
+                            <option value="2027-2028">2027–2028</option>
+                            <option value="2028-2029">2028–2029</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="tabela-wrapper">
+                        <table id="tabelaCalendario">
+                            <thead>
+                                <tr>
+                                    <th>Categoria / Setor</th>
+                                    <th>Jun</th><th>Jul</th><th>Ago</th>
+                                    <th>Set</th><th>Out</th><th>Nov</th>
+                                    <th>Dez</th><th>Jan</th><th>Fev</th>
+                                    <th>Mar</th><th>Abr</th><th>Mai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoCalendario"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="resumoGeral" class="resumo-geral"></div>
+                <div id="alertaEstoque"></div>
+            </div>
+
+            <!-- TELA: CATEGORIA (com suporte a abas de setor) -->
+            <div id="tela-categoria" class="tela">
+                <div class="tela-header">
+                    <button class="btn-voltar" onclick="mostrarTela('inicio')">← Voltar</button>
+                    <h1 id="tituloCategoriaAtual"></h1>
+                </div>
+                <!-- Abas de setor (só aparece se a categoria tiver setores) -->
+                <div id="containerAbasSetor" class="hidden">
+                    <div id="abasSetor" class="abas-setor"></div>
+                </div>
+                <!-- Lista de atividades (filtrada por setor quando aplicável) -->
+                <div id="listaAtividades" class="lista-atividades"></div>
+            </div>
+
+            <!-- TELA: MINI-CALENDÁRIO -->
+            <div id="tela-atividade" class="tela">
+                <div class="tela-header">
+                    <button class="btn-voltar" onclick="voltarParaCategoria()">← Voltar</button>
+                    <h1 id="tituloAtividadeAtual"></h1>
+                    <span id="frequenciaAtual" class="badge-frequencia"></span>
+                </div>
+                <div class="layout-atividade">
+                    <div class="coluna-calendario">
+                        <div class="card">
+                            <div class="nav-mes">
+                                <button onclick="mudarMes(-1)">◀</button>
+                                <h2 id="tituloMes"></h2>
+                                <button onclick="mudarMes(1)">▶</button>
+                            </div>
+                            <div id="miniCalendario" class="mini-calendario"></div>
+                        </div>
+                        <div class="card" id="cardHistorico">
+                            <h3>📋 Histórico de Registros</h3>
+                            <div id="listaHistorico"></div>
+                        </div>
+                    </div>
+                    <div class="coluna-formulario" id="colunaFormulario">
+                        <div class="card placeholder-formulario">
+                            <p>👆 Clique em um dia no calendário para registrar a atividade</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: COLMEIAS -->
+            <div id="tela-colmeias" class="tela">
+                <div class="tela-header">
+                    <h1>🐝 Cadastro de Colmeias</h1>
+                    <button onclick="abrirFormColmeia()">➕ Nova Colmeia</button>
+                    <button onclick="abrirModalNovaVistoria()">📋 Nova Vistoria</button>
+                </div>
+
+                <div id="formColmeia" class="card hidden">
+                    <h3 id="tituloFormColmeia">Nova Colmeia</h3>
+                    <input type="hidden" id="colmeiaEditandoId">
+                    <div class="form-grid">
+                        <div class="form-campo">
+                            <label>Código</label>
+                            <input type="text" id="colmeiaCodigo" placeholder="Ex: JAT-001">
+                        </div>
+                        <div class="form-campo">
+                            <label>Nome Popular</label>
+                            <input type="text" id="colmeiaNomePopular" placeholder="Ex: Jataí">
+                        </div>
+                        <div class="form-campo">
+                            <label>Espécie</label>
+                            <input type="text" id="colmeiaEspecie" placeholder="Ex: Tetragonisca angustula">
+                        </div>
+                        <div class="form-campo">
+                            <label>Localização</label>
+                            <input type="text" id="colmeiaLocalizacao" placeholder="Ex: Meliponário A">
+                        </div>
+                        <div class="form-campo">
+                            <label>Origem</label>
+                            <input type="text" id="colmeiaOrigem" placeholder="Ex: Captura, Divisão, Compra">
+                        </div>
+                        <div class="form-campo">
+                            <label>Status</label>
+                            <select id="colmeiaStatus">
+                                <option value="ativa">Ativa</option>
+                                <option value="inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <div class="form-campo">
+                            <label>Observações</label>
+                            <textarea id="colmeiaObservacoes" rows="2" placeholder="Observações"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:12px">
+                        <button onclick="salvarColmeia()">💾 Salvar</button>
+                        <button class="btn-voltar" onclick="fecharFormColmeia()">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="filtro-colmeias">
+                        <input type="text" id="buscaColmeia" placeholder="🔍 Buscar por código ou espécie..." oninput="filtrarColmeias()">
+                        <select id="filtroStatusColmeia" onchange="filtrarColmeias()">
+                            <option value="">Todos os status</option>
+                            <option value="ativa">Ativas</option>
+                            <option value="inativa">Inativas</option>
+                        </select>
+                    </div>
+                    <div id="tabelaColmeias"></div>
+                    <div id="detalheColmeia" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- TELA: RELATÓRIOS -->
+            <div id="tela-relatorios" class="tela">
+                <div class="tela-header">
+                    <h1>📊 Relatórios</h1>
+                </div>
+                <div class="filtros-relatorio card">
+                    <div class="filtro-grupo">
+                        <label>Atividade:</label>
+                        <select id="filtroAtividade"><option value="">Todas</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Responsável:</label>
+                        <input type="text" id="filtroResponsavel" placeholder="Nome">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>De:</label>
+                        <input type="date" id="filtroDe">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Até:</label>
+                        <input type="date" id="filtroAte">
+                    </div>
+                    <button onclick="gerarRelatorio()">🔍 Buscar</button>
+                </div>
+                <div id="resultadoRelatorio"></div>
+            </div>
+
+            <!-- TELA: ADMINISTRAÇÃO -->
+            <div id="tela-admin" class="tela">
+                <div class="tela-header">
+                    <h1>⚙️ Administração</h1>
+                </div>
+                <div class="admin-grid">
+                    <!-- CARD: CATEGORIAS -->
+                    <div class="card">
+                        <h3>📁 Categorias</h3>
+                        <div id="listaCategorias" class="admin-lista"></div>
+                        <hr>
+                        <h4>Nova Categoria</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoIconeCategoria" placeholder="Ícone (ex: 🌱)" maxlength="2">
+                            <input type="file" id="novaImagemCategoria" accept="image/*" style="font-size:12px;margin-top:4px">
+                            <input type="text" id="novoNomeCategoria" placeholder="Nome da categoria">
+                            <button onclick="adicionarCategoria()">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- CARD: SETORES (NOVO) -->
+                    <div class="card">
+                        <h3>🗂️ Setores</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">
+                            Setores dividem uma categoria em sub-áreas (ex: Oficina → Marcenaria, Serralheria).
+                            Categorias sem setores funcionam normalmente.
+                        </p>
+                        <div class="form-grupo" style="margin-bottom:12px">
+                            <select id="filtroCategoriaStor" onchange="carregarSetoresAdmin()">
+                                <option value="">Selecione a categoria</option>
+                            </select>
+                        </div>
+                        <div id="listaSetoresAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Setor</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoIconeSetor" placeholder="Ícone (ex: 🪵)" maxlength="4">
+                            <input type="text" id="novoNomeSetor" placeholder="Nome do setor">
+                            <button onclick="adicionarSetor()">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- CARD: ATIVIDADES -->
+                    <div class="card">
+                        <h3>📋 Atividades</h3>
+                        <div id="listaAtividadesAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Nova Atividade</h4>
+                        <div class="form-grupo">
+                            <select id="categoriaNovaAtividade" onchange="atualizarSetoresNovaAtividade()">
+                                <option value="">Selecione a categoria</option>
+                            </select>
+                            <!-- Setor opcional, aparece quando categoria tem setores -->
+                            <select id="setorNovaAtividade" class="hidden">
+                                <option value="">Sem setor (geral)</option>
+                            </select>
+                            <input type="text" id="novoNomeAtividade" placeholder="Nome da atividade">
+                            <input type="text" id="novaFrequencia" placeholder="Frequência (ex: 2x semana)">
+                            <div class="check-opcoes">
+                                <label><input type="checkbox" id="novaUsaColmeias"> Usa campo de colmeias</label>
+                                <label><input type="checkbox" id="novaUsaChecklist" checked> Usa checklist</label>
+                            </div>
+                            <button onclick="adicionarAtividade()">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- CARD: CAMPOS DE TEXTO -->
+                    <div class="card">
+                        <h3>📝 Campos de Texto Livre</h3>
+                        <div class="form-grupo">
+                            <select id="atividadeCamposTexto" onchange="carregarCamposTextoAdmin()">
+                                <option value="">Selecione a atividade</option>
+                            </select>
+                        </div>
+                        <div id="listaCamposTextoAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Campo</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoLabelCampoTexto" placeholder="Nome do campo (ex: Data de instalação)">
+                            <button onclick="adicionarCampoTexto()">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- CARD: CHECKLIST -->
+                    <div class="card">
+                        <h3>✅ Itens do Checklist</h3>
+                        <div class="form-grupo">
+                            <select id="atividadeChecklist" onchange="carregarChecklistAdmin()">
+                                <option value="">Selecione a atividade</option>
+                            </select>
+                        </div>
+                        <div id="listaChecklistAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Item</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoItemChecklist" placeholder="Descrição do item">
+                            <button onclick="adicionarItemChecklist()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: DASHBOARD ADMIN -->
+            <div id="tela-dashboard" class="tela">
+                <div class="tela-header">
+                    <h1>📈 Dashboard</h1>
+                </div>
+                <div id="resumoDashboard" class="resumo-geral"></div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>📅 Registros por Mês</h3>
+                        <div id="graficoMes" class="grafico-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>👤 Registros por Usuário</h3>
+                        <div id="graficoUsuario" class="grafico-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>⚠️ Atividades com Poucos Registros</h3>
+                        <div id="listaPendencias"></div>
+                    </div>
+                    <div class="card">
+                        <h3>📋 Últimos Registros</h3>
+                        <div id="ultimosRegistros"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: USUÁRIOS -->
+            <div id="tela-usuarios" class="tela">
+                <div class="tela-header">
+                    <h1>👥 Usuários</h1>
+                </div>
+                <div class="card">
+                    <div id="tabelaUsuarios"></div>
+                </div>
+            </div>
+
+            <!-- TELA: RELATÓRIO DE AÇÕES -->
+            <div id="tela-acoes" class="tela">
+                <div class="tela-header">
+                    <h1>🐝 Relatório de Ações</h1>
+                    <button onclick="imprimirRelatorioAcoes()">🖨️ Imprimir / Salvar PDF</button>
+                </div>
+                <div class="filtros-relatorio card">
+                    <div class="filtro-grupo">
+                        <label>De:</label>
+                        <input type="date" id="filtroAcoesDE">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Até:</label>
+                        <input type="date" id="filtroAcoesATE">
+                    </div>
+                    <button onclick="gerarRelatorioAcoes()">🔍 Buscar</button>
+                </div>
+                <div id="resultadoAcoes"></div>
+            </div>
+
+            <!-- TELA: ESTOQUE -->
+            <div id="tela-estoque" class="tela">
+                <div class="tela-header">
+                    <h1>📦 Estoque</h1>
+                </div>
+                <div class="card estoque-categorias">
+                    <div id="abasCategoriaEstoque" class="abas-estoque"></div>
+                    <!-- Abas de setor dentro do estoque (aparece quando categoria tem setores) -->
+                    <div id="containerAbasSetorEstoque" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cinza-borda)">
+                        <div id="abasSetorEstoque" class="abas-setor"></div>
+                    </div>
+                </div>
+                <div id="formEstoqueItem" class="card hidden">
+                    <h3 id="tituloFormEstoque">Novo Item</h3>
+                    <input type="hidden" id="estoqueItemEditandoId">
+                    <div class="form-grid">
+                        <div class="form-campo">
+                            <label>Nome do produto</label>
+                            <input type="text" id="estoqueItemNome" placeholder="Ex: Caixa modelo 7">
+                        </div>
+                        <div class="form-campo">
+                            <label>Quantidade atual</label>
+                            <input type="number" id="estoqueItemQtdAtual" min="0" value="0">
+                        </div>
+                        <div class="form-campo">
+                            <label>Quantidade mínima</label>
+                            <input type="number" id="estoqueItemQtdMinima" min="0" value="0">
+                        </div>
+                        <div class="form-campo">
+                            <label>Unidade</label>
+                            <input type="text" id="estoqueItemUnidade" placeholder="Ex: unid, kg, litro" value="unid">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:12px">
+                        <button onclick="salvarItemEstoque()">💾 Salvar</button>
+                        <button class="btn-voltar" onclick="fecharFormEstoque()">Cancelar</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                        <h3 id="tituloEstoqueCategoria">Selecione uma categoria</h3>
+                        <button id="btnNovoItemEstoque" onclick="abrirFormEstoque()" class="hidden">➕ Novo Item</button>
+                    </div>
+                    <div id="tabelaEstoque"></div>
+                </div>
+
+                <!-- MODAL ENTRADA -->
+                <div id="modalEntradaEstoque" class="modal hidden">
+                    <div class="modal-box">
+                        <h3>📥 Registrar Entrada</h3>
+                        <input type="hidden" id="entradaItemId">
+                        <div class="form-campo">
+                            <label>Quantidade</label>
+                            <input type="number" id="entradaQtd" min="1" placeholder="Quantidade">
+                        </div>
+                        <div class="form-campo">
+                            <label>Motivo</label>
+                            <input type="text" id="entradaMotivo" placeholder="Ex: Compra de fornecedor">
+                        </div>
+                        <div class="form-campo">
+                            <label>Observação</label>
+                            <input type="text" id="entradaObservacao" placeholder="Observação opcional">
+                        </div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalEntrada()">Cancelar</button>
+                            <button onclick="confirmarEntrada()">✅ Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL SAÍDA -->
+                <div id="modalSaidaEstoque" class="modal hidden">
+                    <div class="modal-box">
+                        <h3>📤 Registrar Saída</h3>
+                        <input type="hidden" id="saidaItemId">
+                        <div class="form-campo">
+                            <label>Quantidade</label>
+                            <input type="number" id="saidaQtd" min="1" placeholder="Quantidade">
+                        </div>
+                        <div class="form-campo">
+                            <label>Motivo</label>
+                            <input type="text" id="saidaMotivo" placeholder="Ex: Uso em colmeia JAT-001">
+                        </div>
+                        <div class="form-campo">
+                            <label>Observação</label>
+                            <input type="text" id="saidaObservacao" placeholder="Observação opcional">
+                        </div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalSaida()">Cancelar</button>
+                            <button onclick="confirmarSaida()">✅ Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL HISTÓRICO -->
+                <div id="modalHistoricoEstoque" class="modal hidden">
+                    <div class="modal-box" style="width:520px;max-width:95vw">
+                        <h3 id="tituloHistoricoEstoque">Histórico</h3>
+                        <div id="listaHistoricoEstoque" style="max-height:360px;overflow-y:auto;margin:16px 0"></div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalHistorico()">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL NOVA VISTORIA -->
+    <div id="modalNovaVistoria" class="modal hidden">
+        <div class="modal-box">
+            <h3>📋 Nova Vistoria</h3>
+            <p>Selecione a colmeia:</p>
+            <input type="text" id="selectColmeiaVistoria" list="listaColmeias"
+                placeholder="Digite ou selecione o código..."
+                style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:16px">
+            <datalist id="listaColmeias"></datalist>
+            <div class="modal-botoes">
+                <button onclick="fecharModalNovaVistoria()">Cancelar</button>
+                <button onclick="confirmarNovaVistoria()" class="btn-primario">Abrir Vistoria</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SENHA ADMIN -->
+    <div id="modalSenha" class="modal hidden">
+        <div class="modal-box">
+            <h3>🔒 Área Administrativa</h3>
+            <p>Digite a senha para acessar:</p>
+            <input type="password" id="inputSenhaAdmin" placeholder="Senha">
+            <div class="modal-botoes">
+                <button onclick="fecharModal()">Cancelar</button>
+                <button onclick="verificarSenha()" class="btn-primario">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="supabase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
