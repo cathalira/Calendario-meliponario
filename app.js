@@ -1332,6 +1332,7 @@ function renderizarTabelaEstoque() {
                         : '<span class="badge-status badge-ativa">✅ OK</span>'}</td>
                     <td>
                         <button class="btn-editar" onclick="abrirModalEntrada('${item.id}')">📥 Entrada</button>
+                        <button class="btn-editar" onclick="abrirModalSaida('${item.id}')">📤 Saída</button>
                         <button class="btn-editar" onclick="verHistoricoItem('${item.id}')">📋 Histórico</button>
                         <button class="btn-editar" onclick="editarItemEstoque('${item.id}')">✏️</button>
                         <button class="btn-excluir-tabela" onclick="excluirItemEstoque('${item.id}')">🗑️</button>
@@ -1509,4 +1510,45 @@ function renderizarAlertaEstoque() {
                 </div>`;
             }).join('')}
         </div>`;
+}
+// SAÍDA MANUAL
+function abrirModalSaida(itemId) {
+    document.getElementById('saidaItemId').value = itemId;
+    document.getElementById('saidaQtd').value = '';
+    document.getElementById('saidaMotivo').value = '';
+    document.getElementById('saidaObservacao').value = '';
+    document.getElementById('modalSaidaEstoque').classList.remove('hidden');
+}
+
+function fecharModalSaida() {
+    document.getElementById('modalSaidaEstoque').classList.add('hidden');
+}
+
+async function confirmarSaida() {
+    const itemId = document.getElementById('saidaItemId').value;
+    const qtd = parseFloat(document.getElementById('saidaQtd').value);
+    const motivo = document.getElementById('saidaMotivo').value.trim();
+    const observacao = document.getElementById('saidaObservacao').value.trim();
+    if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
+    if (!motivo) { mostrarToast('Informe o motivo da saída', true); return; }
+    try {
+        const item = estoqueItens.find(i => i.id === itemId);
+        if (qtd > item.quantidade_atual) { mostrarToast('Quantidade insuficiente em estoque', true); return; }
+        const novaQtd = item.quantidade_atual - qtd;
+        await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
+        item.quantidade_atual = novaQtd;
+        const mov = await db.inserir('estoque_movimentacoes', {
+            item_id: itemId,
+            tipo: 'saida',
+            quantidade: qtd,
+            motivo,
+            observacao: observacao || null,
+            usuario_id: usuarioLogado ? usuarioLogado.id : null
+        });
+        estoqueMovimentacoes.push(mov);
+        fecharModalSaida();
+        renderizarTabelaEstoque();
+        renderizarAlertaEstoque();
+        mostrarToast(`✅ Saída de ${qtd} ${item.unidade} registrada!`);
+    } catch(e) { mostrarToast('Erro ao registrar saída', true); console.error(e); }
 }

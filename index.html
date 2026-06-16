@@ -448,6 +448,29 @@
                         </div>
                     </div>
                 </div>
+                <!-- MODAL SAÍDA -->
+                <div id="modalSaidaEstoque" class="modal hidden">
+                    <div class="modal-box">
+                        <h3>📤 Registrar Saída</h3>
+                        <input type="hidden" id="saidaItemId">
+                        <div class="form-campo">
+                            <label>Quantidade</label>
+                            <input type="number" id="saidaQtd" min="1" placeholder="Quantidade">
+                        </div>
+                        <div class="form-campo">
+                            <label>Motivo</label>
+                            <input type="text" id="saidaMotivo" placeholder="Ex: Uso em colmeia JAT-001">
+                        </div>
+                        <div class="form-campo">
+                            <label>Observação</label>
+                            <input type="text" id="saidaObservacao" placeholder="Observação opcional">
+                        </div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalSaida()">Cancelar</button>
+                            <button onclick="confirmarSaida()">✅ Confirmar</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="modalHistoricoEstoque" class="modal hidden">
                     <div class="modal-box" style="width:520px;max-width:95vw">
                         <h3 id="tituloHistoricoEstoque">Histórico</h3>
