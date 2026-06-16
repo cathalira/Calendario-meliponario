@@ -82,14 +82,11 @@ async function carregarTudo() {
         colmeias       = await db.get('colmeias');
         vistorias      = await db.get('vistorias');
         camposTexto    = await db.get('campos_texto');
-        estoqueItens          = await db.get('estoque_itens');
-        estoqueMovimentacoes  = await db.get('estoque_movimentacoes');
 
         renderizarMenuCategorias();
         renderizarCalendarioGeral();
         renderizarResumoGeral();
         popularSelects();
-        renderizarAlertaEstoque();
     } catch(e) {
         mostrarToast('Erro ao conectar com o banco de dados', true);
         console.error(e);
@@ -173,7 +170,6 @@ function mostrarTela(nome) {
     if (nome === 'colmeias') renderizarColmeias();
 if (nome === 'acoes') { setTimeout(() => { const hoje = new Date(); const trinta = new Date(); trinta.setDate(hoje.getDate() - 30); document.getElementById('filtroAcoesDE').value = trinta.toISOString().split('T')[0]; document.getElementById('filtroAcoesATE').value = hoje.toISOString().split('T')[0]; gerarRelatorioAcoes(); }, 100); }
     if (nome === 'usuarios') renderizarUsuarios();
-    if (nome === 'estoque') { carregarEstoque().then(() => { renderizarAbasEstoque(); renderizarTabelaEstoque(); }); }
     if (nome === 'inicio') { renderizarCalendarioGeral(); renderizarResumoGeral(); }
 }
 
@@ -741,7 +737,6 @@ async function salvarVistoria(colmeiaId) {
         } else {
             const nova = await db.inserir('vistorias', dados);
             vistorias.push(nova);
-            await registrarSaidaEstoqueVistoria(nova.id, colmeiaId, acoesSelecionadas, dados.observacoes || '');
             mostrarToast('✅ Vistoria salva!');
         }
         abrirDetalheColmeia(colmeiaId);
@@ -1265,248 +1260,4 @@ function confirmarNovaVistoria() {
         abrirDetalheColmeia(colmeiaId);
         setTimeout(() => abrirFormVistoria(colmeiaId), 400);
     }, 300);
-}
-// =============================================
-// ESTOQUE
-// =============================================
-let estoqueItens = [];
-let estoqueMovimentacoes = [];
-let categoriaSelecionadaEstoque = null;
-
-async function carregarEstoque() {
-    estoqueItens = await db.get('estoque_itens');
-    estoqueMovimentacoes = await db.get('estoque_movimentacoes');
-}
-
-function renderizarAbasEstoque() {
-    const container = document.getElementById('abasCategoriaEstoque');
-    if (!container) return;
-    container.innerHTML = categorias.map(cat => `
-        <button class="aba-estoque ${categoriaSelecionadaEstoque?.id === cat.id ? 'ativa' : ''}"
-            onclick="selecionarCategoriaEstoque('${cat.id}')">
-            ${cat.icone || '📦'} ${cat.nome}
-        </button>
-    `).join('');
-}
-
-function selecionarCategoriaEstoque(categoriaId) {
-    categoriaSelecionadaEstoque = categorias.find(c => c.id === categoriaId);
-    renderizarAbasEstoque();
-    renderizarTabelaEstoque();
-    document.getElementById('tituloEstoqueCategoria').textContent =
-        `${categoriaSelecionadaEstoque.icone || '📦'} ${categoriaSelecionadaEstoque.nome}`;
-    document.getElementById('btnNovoItemEstoque').classList.remove('hidden');
-    fecharFormEstoque();
-}
-
-function renderizarTabelaEstoque() {
-    const container = document.getElementById('tabelaEstoque');
-    if (!categoriaSelecionadaEstoque) {
-        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Selecione uma categoria acima.</p>';
-        return;
-    }
-    const itens = estoqueItens.filter(i => i.categoria_id === categoriaSelecionadaEstoque.id);
-    if (itens.length === 0) {
-        container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Nenhum item cadastrado nesta categoria.</p>';
-        return;
-    }
-    container.innerHTML = `
-        <table class="tabela-colmeias">
-            <thead><tr>
-                <th>Produto</th>
-                <th>Unidade</th>
-                <th>Qtd Atual</th>
-                <th>Qtd Mínima</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr></thead>
-            <tbody>${itens.map(item => {
-                const abaixo = item.quantidade_atual <= item.quantidade_minima;
-                return `<tr class="${abaixo ? 'estoque-baixo' : ''}">
-                    <td><b>${item.nome}</b></td>
-                    <td>${item.unidade || 'unid'}</td>
-                    <td><b>${item.quantidade_atual}</b></td>
-                    <td>${item.quantidade_minima}</td>
-                    <td>${abaixo
-                        ? '<span class="badge-status badge-inativa">⚠️ Baixo</span>'
-                        : '<span class="badge-status badge-ativa">✅ OK</span>'}</td>
-                    <td>
-                        <button class="btn-editar" onclick="abrirModalEntrada('${item.id}')">📥 Entrada</button>
-                        <button class="btn-editar" onclick="verHistoricoItem('${item.id}')">📋 Histórico</button>
-                        <button class="btn-editar" onclick="editarItemEstoque('${item.id}')">✏️</button>
-                        <button class="btn-excluir-tabela" onclick="excluirItemEstoque('${item.id}')">🗑️</button>
-                    </td>
-                </tr>`;
-            }).join('')}</tbody>
-        </table>`;
-}
-
-function abrirFormEstoque() {
-    document.getElementById('tituloFormEstoque').textContent = 'Novo Item';
-    document.getElementById('estoqueItemEditandoId').value = '';
-    document.getElementById('estoqueItemNome').value = '';
-    document.getElementById('estoqueItemQtdAtual').value = '0';
-    document.getElementById('estoqueItemQtdMinima').value = '0';
-    document.getElementById('estoqueItemUnidade').value = 'unid';
-    document.getElementById('formEstoqueItem').classList.remove('hidden');
-    document.getElementById('formEstoqueItem').scrollIntoView({ behavior: 'smooth' });
-}
-
-function fecharFormEstoque() {
-    document.getElementById('formEstoqueItem').classList.add('hidden');
-}
-
-function editarItemEstoque(id) {
-    const item = estoqueItens.find(i => i.id === id);
-    if (!item) return;
-    document.getElementById('tituloFormEstoque').textContent = 'Editar Item';
-    document.getElementById('estoqueItemEditandoId').value = item.id;
-    document.getElementById('estoqueItemNome').value = item.nome;
-    document.getElementById('estoqueItemQtdAtual').value = item.quantidade_atual;
-    document.getElementById('estoqueItemQtdMinima').value = item.quantidade_minima;
-    document.getElementById('estoqueItemUnidade').value = item.unidade || 'unid';
-    document.getElementById('formEstoqueItem').classList.remove('hidden');
-    document.getElementById('formEstoqueItem').scrollIntoView({ behavior: 'smooth' });
-}
-
-async function salvarItemEstoque() {
-    if (!categoriaSelecionadaEstoque) return;
-    const id = document.getElementById('estoqueItemEditandoId').value;
-    const dados = {
-        categoria_id: categoriaSelecionadaEstoque.id,
-        nome: document.getElementById('estoqueItemNome').value.trim(),
-        quantidade_atual: parseFloat(document.getElementById('estoqueItemQtdAtual').value) || 0,
-        quantidade_minima: parseFloat(document.getElementById('estoqueItemQtdMinima').value) || 0,
-        unidade: document.getElementById('estoqueItemUnidade').value.trim() || 'unid'
-    };
-    if (!dados.nome) { mostrarToast('Preencha o nome do produto', true); return; }
-    try {
-        if (id) {
-            await db.atualizar('estoque_itens', id, dados);
-            const idx = estoqueItens.findIndex(i => i.id === id);
-            if (idx !== -1) estoqueItens[idx] = { ...estoqueItens[idx], ...dados };
-            mostrarToast('✅ Item atualizado!');
-        } else {
-            const novo = await db.inserir('estoque_itens', dados);
-            estoqueItens.push(novo);
-            mostrarToast('✅ Item cadastrado!');
-        }
-        fecharFormEstoque();
-        renderizarTabelaEstoque();
-        renderizarAlertaEstoque();
-    } catch(e) { mostrarToast('Erro ao salvar item', true); console.error(e); }
-}
-
-async function excluirItemEstoque(id) {
-    if (!confirm('Excluir este item do estoque?')) return;
-    try {
-        await db.deletar('estoque_itens', id);
-        estoqueItens = estoqueItens.filter(i => i.id !== id);
-        renderizarTabelaEstoque();
-        renderizarAlertaEstoque();
-        mostrarToast('Item excluído');
-    } catch(e) { mostrarToast('Erro ao excluir item', true); }
-}
-
-function abrirModalEntrada(itemId) {
-    document.getElementById('entradaItemId').value = itemId;
-    document.getElementById('entradaQtd').value = '';
-    document.getElementById('entradaMotivo').value = '';
-    document.getElementById('entradaObservacao').value = '';
-    document.getElementById('modalEntradaEstoque').classList.remove('hidden');
-}
-
-function fecharModalEntrada() {
-    document.getElementById('modalEntradaEstoque').classList.add('hidden');
-}
-
-async function confirmarEntrada() {
-    const itemId = document.getElementById('entradaItemId').value;
-    const qtd = parseFloat(document.getElementById('entradaQtd').value);
-    const motivo = document.getElementById('entradaMotivo').value.trim();
-    const observacao = document.getElementById('entradaObservacao').value.trim();
-    if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
-    if (!motivo) { mostrarToast('Informe o motivo da entrada', true); return; }
-    try {
-        const item = estoqueItens.find(i => i.id === itemId);
-        const novaQtd = (item.quantidade_atual || 0) + qtd;
-        await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
-        item.quantidade_atual = novaQtd;
-        const mov = await db.inserir('estoque_movimentacoes', {
-            item_id: itemId,
-            tipo: 'entrada',
-            quantidade: qtd,
-            motivo,
-            observacao: observacao || null,
-            usuario_id: usuarioLogado ? usuarioLogado.id : null
-        });
-        estoqueMovimentacoes.push(mov);
-        fecharModalEntrada();
-        renderizarTabelaEstoque();
-        renderizarAlertaEstoque();
-        mostrarToast(`✅ Entrada de ${qtd} ${item.unidade} registrada!`);
-    } catch(e) { mostrarToast('Erro ao registrar entrada', true); console.error(e); }
-}
-
-async function registrarSaidaEstoqueVistoria(vistoriaId, colmeiaId, acoesSelecionadas, observacao = '') {
-    if (acoesSelecionadas.length === 0) return;
-    const colmeia = colmeias.find(c => c.id === colmeiaId);
-    const dataHoje = new Date().toLocaleDateString('pt-BR');
-    const motivo = `Vistoria colmeia ${colmeia ? colmeia.codigo : colmeiaId} — ${dataHoje} — Ações: ${acoesSelecionadas.join(', ')}`;
-    console.log('Saída automática registrada:', motivo);
-}
-
-async function verHistoricoItem(itemId) {
-    const item = estoqueItens.find(i => i.id === itemId);
-    if (!item) return;
-    document.getElementById('tituloHistoricoEstoque').textContent = `📋 Histórico — ${item.nome}`;
-    try {
-        const movs = await db.query('estoque_movimentacoes', `item_id=eq.${itemId}&order=criado_em.desc`);
-        const lista = document.getElementById('listaHistoricoEstoque');
-        if (movs.length === 0) {
-            lista.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Nenhuma movimentação registrada.</p>';
-        } else {
-            lista.innerHTML = movs.map(m => {
-                const data = new Date(m.criado_em).toLocaleDateString('pt-BR');
-                const hora = new Date(m.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                const cor = m.tipo === 'entrada' ? '#2e7d32' : '#c62828';
-                const icone = m.tipo === 'entrada' ? '📥' : '📤';
-                return `<div class="historico-mov-item">
-                    <div style="display:flex;justify-content:space-between;align-items:center">
-                        <span style="font-weight:600;color:${cor}">${icone} ${m.tipo === 'entrada' ? '+' : '-'}${m.quantidade} ${item.unidade}</span>
-                        <span style="font-size:12px;color:#999">${data} ${hora}</span>
-                    </div>
-                    <div style="font-size:13px;color:#555;margin-top:4px">${m.motivo || '—'}</div>
-                    ${m.observacao ? `<div style="font-size:12px;color:#888;margin-top:2px">📝 ${m.observacao}</div>` : ''}
-                </div>`;
-            }).join('');
-        }
-        document.getElementById('modalHistoricoEstoque').classList.remove('hidden');
-    } catch(e) { mostrarToast('Erro ao carregar histórico', true); console.error(e); }
-}
-
-function fecharModalHistorico() {
-    document.getElementById('modalHistoricoEstoque').classList.add('hidden');
-}
-
-function renderizarAlertaEstoque() {
-    const container = document.getElementById('alertaEstoque');
-    if (!container) return;
-    const itensBaixos = estoqueItens.filter(i => i.quantidade_atual <= i.quantidade_minima);
-    if (itensBaixos.length === 0) {
-        container.innerHTML = '';
-        return;
-    }
-    container.innerHTML = `
-        <div class="card alerta-estoque-card">
-            <h3>⚠️ Estoque Baixo</h3>
-            <p style="font-size:13px;color:#888;margin-bottom:12px">${itensBaixos.length} item(s) abaixo da quantidade mínima</p>
-            ${itensBaixos.map(item => {
-                const cat = categorias.find(c => c.id === item.categoria_id);
-                return `<div class="alerta-estoque-item">
-                    <span>${cat ? `${cat.icone} ${cat.nome}` : '📦'} — <b>${item.nome}</b></span>
-                    <span style="color:#c62828;font-weight:600">${item.quantidade_atual} / ${item.quantidade_minima} ${item.unidade}</span>
-                </div>`;
-            }).join('')}
-        </div>`;
 }
