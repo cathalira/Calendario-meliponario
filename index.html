@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema da Chácara Alternativa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="telaLogin" class="tela-login">
+        <div class="login-box">
+            <div class="login-logo">🌿</div>
+            <h1>Chácara Alternativa</h1>
+            <p>Sistema de Gestão</p>
+
+            <div id="formLogin">
+                <div class="form-campo">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-campo">
+                    <label>Senha</label>
+                    <input type="password" id="loginSenha" placeholder="Sua senha">
+                </div>
+                <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+                <p class="login-link">Não tem conta? <a href="#" onclick="mostrarCadastro()">Criar conta</a></p>
+            </div>
+
+            <div id="formCadastro" class="hidden">
+                <div class="form-campo">
+                    <label>Nome completo</label>
+                    <input type="text" id="cadastroNome" placeholder="Seu nome">
+                </div>
+                <div class="form-campo">
+                    <label>Email</label>
+                    <input type="email" id="cadastroEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-campo">
+                    <label>Senha</label>
+                    <input type="password" id="cadastroSenha" placeholder="Crie uma senha">
+                </div>
+                <div class="form-campo">
+                    <label>Confirmar senha</label>
+                    <input type="password" id="cadastroConfirma" placeholder="Repita a senha">
+                </div>
+                <button class="btn-login" onclick="fazerCadastro()">Criar conta</button>
+                <p class="login-link">Já tem conta? <a href="#" onclick="mostrarLogin()">Entrar</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
+    <div id="sistemaPrincipal" class="hidden">
+
+        <!-- MENU LATERAL -->
+        <aside id="menuLateral">
+            <div class="menu-header">
+                <span class="menu-logo">🌿</span>
+                <span class="menu-titulo">Chácara<br>Alternativa</span>
+            </div>
+
+            <nav>
+                <div class="menu-secao">NAVEGAÇÃO</div>
+                <a href="#" class="menu-item ativo" onclick="mostrarTela('inicio')">
+                    🏠 <span>Início</span>
+                </a>
+
+                <div class="menu-secao">CATEGORIAS</div>
+                <div id="menuCategorias"></div>
+
+                <div class="menu-secao">SISTEMA</div>
+                <a href="#" class="menu-item" onclick="mostrarTela('colmeias')">
+                    🐝 <span>Colmeias</span>
+                    </a>
+                    <a href="#" class="menu-item" onclick="mostrarTela('acoes')">
+                        🐝 <span>Rel. Ações</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('relatorios')">
+                    📊 <span>Relatórios</span>
+                </a>
+                <a href="#" class="menu-item" onclick="mostrarTela('admin')">
+                    ⚙️ <span>Administração</span>
+                </a>
+                <div id="menuAdmin" class="hidden">
+                    <a href="#" class="menu-item" onclick="mostrarTela('dashboard')">
+                        📈 <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="menu-item" onclick="mostrarTela('usuarios')">
+                        👥 <span>Usuários</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="menu-footer">
+                <div id="nomeUsuarioMenu" class="usuario-menu"></div>
+                <button class="btn-sair" onclick="fazerLogout()">Sair</button>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL -->
+        <main id="areaPrincipal">
+
+            <!-- TELA: INÍCIO -->
+            <div id="tela-inicio" class="tela ativa">
+                <div class="tela-header">
+                    <h1>📅 Calendário Geral</h1>
+                    <div class="ano-selector">
+                        <label>Ano produtivo:</label>
+                        <select id="anoProdutivo" onchange="renderizarCalendarioGeral()">
+                            <option value="2026-2027">2026–2027</option>
+                            <option value="2027-2028">2027–2028</option>
+                            <option value="2028-2029">2028–2029</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="tabela-wrapper">
+                        <table id="tabelaCalendario">
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Jun</th><th>Jul</th><th>Ago</th>
+                                    <th>Set</th><th>Out</th><th>Nov</th>
+                                    <th>Dez</th><th>Jan</th><th>Fev</th>
+                                    <th>Mar</th><th>Abr</th><th>Mai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoCalendario"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="resumoGeral" class="resumo-geral"></div>
+            </div>
+
+            <!-- TELA: CATEGORIA -->
+            <div id="tela-categoria" class="tela">
+                <div class="tela-header">
+                    <button class="btn-voltar" onclick="mostrarTela('inicio')">← Voltar</button>
+                    <h1 id="tituloCategoriaAtual"></h1>
+                </div>
+                <div id="listaAtividades" class="lista-atividades"></div>
+            </div>
+
+            <!-- TELA: MINI-CALENDÁRIO -->
+            <div id="tela-atividade" class="tela">
+                <div class="tela-header">
+                    <button class="btn-voltar" onclick="voltarParaCategoria()">← Voltar</button>
+                    <h1 id="tituloAtividadeAtual"></h1>
+                    <span id="frequenciaAtual" class="badge-frequencia"></span>
+                </div>
+                <div class="layout-atividade">
+                    <div class="coluna-calendario">
+                        <div class="card">
+                            <div class="nav-mes">
+                                <button onclick="mudarMes(-1)">◀</button>
+                                <h2 id="tituloMes"></h2>
+                                <button onclick="mudarMes(1)">▶</button>
+                            </div>
+                            <div id="miniCalendario" class="mini-calendario"></div>
+                        </div>
+                        <div class="card" id="cardHistorico">
+                            <h3>📋 Histórico de Registros</h3>
+                            <div id="listaHistorico"></div>
+                        </div>
+                    </div>
+                    <div class="coluna-formulario" id="colunaFormulario">
+                        <div class="card placeholder-formulario">
+                            <p>👆 Clique em um dia no calendário para registrar a atividade</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: COLMEIAS -->
+            <div id="tela-colmeias" class="tela">
+                <div class="tela-header">
+                    <h1>🐝 Cadastro de Colmeias</h1>
+                    <button onclick="abrirFormColmeia()">➕ Nova Colmeia</button>
+                    <button onclick="abrirModalNovaVistoria()">📋 Nova Vistoria</button>
+                </div>
+
+                <div id="formColmeia" class="card hidden">
+                    <h3 id="tituloFormColmeia">Nova Colmeia</h3>
+                    <input type="hidden" id="colmeiaEditandoId">
+                    <div class="form-grid">
+                        <div class="form-campo">
+                            <label>Código</label>
+                            <input type="text" id="colmeiaCodigo" placeholder="Ex: JAT-001">
+                        </div>
+                        <div class="form-campo">
+                            <label>Nome Popular</label>
+                            <input type="text" id="colmeiaNomePopular" placeholder="Ex: Jataí">
+                        </div>
+                        <div class="form-campo">
+                            <label>Espécie</label>
+                            <input type="text" id="colmeiaEspecie" placeholder="Ex: Tetragonisca angustula">
+                        </div>
+                        <div class="form-campo">
+                            <label>Localização</label>
+                            <input type="text" id="colmeiaLocalizacao" placeholder="Ex: Meliponário A">
+                        </div>
+                        <div class="form-campo">
+                    <label>Origem</label>
+                    <input type="text" id="colmeiaOrigem" placeholder="Ex: Captura, Divisão, Compra">
+                </div>
+                        <div class="form-campo">
+                            <label>Status</label>
+                            <select id="colmeiaStatus">
+                                <option value="ativa">Ativa</option>
+                                <option value="inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <div class="form-campo">
+                            <label>Observações</label>
+                            <textarea id="colmeiaObservacoes" rows="2" placeholder="Observações"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:12px">
+                        <button onclick="salvarColmeia()">💾 Salvar</button>
+                        <button class="btn-voltar" onclick="fecharFormColmeia()">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="filtro-colmeias">
+                        <input type="text" id="buscaColmeia" placeholder="🔍 Buscar por código ou espécie..." oninput="filtrarColmeias()">
+                        <select id="filtroStatusColmeia" onchange="filtrarColmeias()">
+                            <option value="">Todos os status</option>
+                            <option value="ativa">Ativas</option>
+                            <option value="inativa">Inativas</option>
+                        </select>
+                    </div>
+                    <div id="tabelaColmeias"></div>
+                    <div id="detalheColmeia" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- TELA: RELATÓRIOS -->
+            <div id="tela-relatorios" class="tela">
+                <div class="tela-header">
+                    <h1>📊 Relatórios</h1>
+                </div>
+                <div class="filtros-relatorio card">
+                    <div class="filtro-grupo">
+                        <label>Atividade:</label>
+                        <select id="filtroAtividade"><option value="">Todas</option></select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Responsável:</label>
+                        <input type="text" id="filtroResponsavel" placeholder="Nome">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>De:</label>
+                        <input type="date" id="filtroDe">
+                    </div>
+                    <div class="filtro-grupo">
+                        <label>Até:</label>
+                        <input type="date" id="filtroAte">
+                    </div>
+                    <button onclick="gerarRelatorio()">🔍 Buscar</button>
+                </div>
+                <div id="resultadoRelatorio"></div>
+            </div>
+
+            <!-- TELA: ADMINISTRAÇÃO -->
+            <div id="tela-admin" class="tela">
+                <div class="tela-header">
+                    <h1>⚙️ Administração</h1>
+                </div>
+                <div class="admin-grid">
+                    <div class="card">
+                        <h3>📁 Categorias</h3>
+                        <div id="listaCategorias" class="admin-lista"></div>
+                        <hr>
+                        <h4>Nova Categoria</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoIconeCategoria" placeholder="Ícone (ex: 🌱)" maxlength="2">
+                            <input type="file" id="novaImagemCategoria" accept="image/*" style="font-size:12px;margin-top:4px">
+                            <input type="text" id="novoNomeCategoria" placeholder="Nome da categoria">
+                            <button onclick="adicionarCategoria()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>📋 Atividades</h3>
+                        <div id="listaAtividadesAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Nova Atividade</h4>
+                        <div class="form-grupo">
+                            <select id="categoriaNovaAtividade"><option value="">Selecione a categoria</option></select>
+                            <input type="text" id="novoNomeAtividade" placeholder="Nome da atividade">
+                            <input type="text" id="novaFrequencia" placeholder="Frequência (ex: 2x semana)">
+                            <div class="check-opcoes">
+                                <label><input type="checkbox" id="novaUsaColmeias"> Usa campo de colmeias</label>
+                                <label><input type="checkbox" id="novaUsaChecklist" checked> Usa checklist</label>
+                            </div>
+                            <button onclick="adicionarAtividade()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>📝 Campos de Texto Livre</h3>
+                        <div class="form-grupo">
+                            <select id="atividadeCamposTexto" onchange="carregarCamposTextoAdmin()"><option value="">Selecione a atividade</option></select>
+                        </div>
+                        <div id="listaCamposTextoAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Campo</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoLabelCampoTexto" placeholder="Nome do campo (ex: Data de instalação)">
+                            <button onclick="adicionarCampoTexto()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>✅ Itens do Checklist</h3>
+                        <div class="form-grupo">
+                            <select id="atividadeChecklist" onchange="carregarChecklistAdmin()"><option value="">Selecione a atividade</option></select>
+                        </div>
+                        <div id="listaChecklistAdmin" class="admin-lista"></div>
+                        <hr>
+                        <h4>Novo Item</h4>
+                        <div class="form-inline">
+                            <input type="text" id="novoItemChecklist" placeholder="Descrição do item">
+                            <button onclick="adicionarItemChecklist()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: DASHBOARD ADMIN -->
+            <div id="tela-dashboard" class="tela">
+                <div class="tela-header">
+                    <h1>📈 Dashboard</h1>
+                </div>
+                <div id="resumoDashboard" class="resumo-geral"></div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>📅 Registros por Mês</h3>
+                        <div id="graficoMes" class="grafico-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>👤 Registros por Usuário</h3>
+                        <div id="graficoUsuario" class="grafico-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>⚠️ Atividades com Poucos Registros</h3>
+                        <div id="listaPendencias"></div>
+                    </div>
+                    <div class="card">
+                        <h3>📋 Últimos Registros</h3>
+                        <div id="ultimosRegistros"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA: USUÁRIOS -->
+            <div id="tela-usuarios" class="tela">
+                <div class="tela-header">
+                    <h1>👥 Usuários</h1>
+                </div>
+                <div class="card">
+                    <div id="tabelaUsuarios"></div>
+                </div>
+            </div>
+                <!-- TELA: RELATÓRIO DE AÇÕES -->
+<div id="tela-acoes" class="tela">
+    <div class="tela-header">
+        <h1>🐝 Relatório de Ações</h1>
+        <button onclick="imprimirRelatorioAcoes()">🖨️ Imprimir / Salvar PDF</button>
+    </div>
+    <div class="filtros-relatorio card">
+        <div class="filtro-grupo">
+            <label>De:</label>
+            <input type="date" id="filtroAcoesDE">
+        </div>
+        <div class="filtro-grupo">
+            <label>Até:</label>
+            <input type="date" id="filtroAcoesATE">
+        </div>
+        <button onclick="gerarRelatorioAcoes()">🔍 Buscar</button>
+    </div>
+    <div id="resultadoAcoes"></div>
+</div>
+        </main>
+    </div>
+    <!-- MODAL NOVA VISTORIA -->
+<div id="modalNovaVistoria" class="modal hidden">
+    <div class="modal-box">
+        <h3>📋 Nova Vistoria</h3>
+        <p>Selecione a colmeia:</p>
+        <input type="text" id="selectColmeiaVistoria" list="listaColmeias" placeholder="Digite ou selecione o código..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:16px">
+        <datalist id="listaColmeias"></datalist>
+        <div class="modal-botoes">
+            <button onclick="fecharModalNovaVistoria()">Cancelar</button>
+            <button onclick="confirmarNovaVistoria()" class="btn-primario">Abrir Vistoria</button>
+        </div>
+    </div>
+</div>
+<!-- MODAL DE SENHA ADMIN -->
+    <div id="modalSenha" class="modal hidden">
+        <div class="modal-box">
+            <h3>🔒 Área Administrativa</h3>
+            <p>Digite a senha para acessar:</p>
+            <input type="password" id="inputSenhaAdmin" placeholder="Senha">
+            <div class="modal-botoes">
+                <button onclick="fecharModal()">Cancelar</button>
+                <button onclick="verificarSenha()" class="btn-primario">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+<!-- TOAST -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="supabase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão da Chácara</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>📅 Sistema de Gestão da Chácara</h1>
+
+        <div class="ano-container">
+            <label>Ano Produtivo:</label>
+
+            <select id="anoProdutivo">
+                <option>2026-2027</option>
+                <option>2027-2028</option>
+                <option>2028-2029</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="painel-geral">
+
+            <h2>Calendário Geral</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>Jun</th>
+                        <th>Jul</th>
+                        <th>Ago</th>
+                        <th>Set</th>
+                        <th>Out</th>
+                        <th>Nov</th>
+                        <th>Dez</th>
+                        <th>Jan</th>
+                        <th>Fev</th>
+                        <th>Mar</th>
+                        <th>Abr</th>
+                        <th>Mai</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr class="categoria" onclick="abrirCategoria('meliponario')">
+                        <td>🐝 Meliponário</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                        <td>●</td>
+                    </tr>
+
+                    <tr class="categoria">
+                        <td>🌱 Produção Vegetal</td>
+                        <td colspan="12">Em construção</td>
+                    </tr>
+
+                    <tr class="categoria">
+                        <td>🧪 Meliprodutos</td>
+                        <td colspan="12">Em construção</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </section>
+
+        <section id="meliponario" class="hidden">
+
+            <h2>🐝 Meliponário</h2>
+
+            <div class="atividades">
+
+                <button onclick="abrirAtividade('alimentacao')">
+                    Alimentação (2x semana)
+                </button>
+
+                <button onclick="abrirAtividade('limpezaInterna')">
+                    Limpeza Interna (1x mês)
+                </button>
+
+                <button onclick="abrirAtividade('limpezaExterna')">
+                    Limpeza Externa (25 a 40 dias)
+                </button>
+
+                <button onclick="abrirAtividade('revisaoInterna')">
+                    Revisão Interna (15 a 25 dias)
+                </button>
+
+                <button onclick="abrirAtividade('revisaoExterna')">
+                    Revisão Externa (Diária)
+                </button>
+
+                <button onclick="abrirCadastroColmeias()">
+                    Cadastro de Colmeias
+                </button>
+
+            </div>
+
+            <div id="conteudoAtividade"></div>
+
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

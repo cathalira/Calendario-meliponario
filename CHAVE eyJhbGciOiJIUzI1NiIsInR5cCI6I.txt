@@ -1,0 +1,3 @@
+CHAVE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsZ29ncmpzZG5iaWFpcGxsbGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzg4NTgsImV4cCI6MjA5Njg1NDg1OH0.dyOf0eEhAUwGLTuVb23JGpzg6wbjjV7jANtakpUQEVU
+
+URL: https://supabase.com/dashboard/project/zlgogrjsdnbiaiplllak/settings/api-keys/legacy 

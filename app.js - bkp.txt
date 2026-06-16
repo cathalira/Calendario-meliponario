@@ -1,0 +1,161 @@
+function abrirCategoria(nome){
+
+    document
+    .getElementById(nome)
+    .classList
+    .toggle("hidden");
+}
+
+function abrirAtividade(tipo){
+
+    const conteudo =
+    document.getElementById("conteudoAtividade");
+
+    let html = "";
+
+    if(tipo === "alimentacao"){
+
+        html = `
+        <div class="card">
+
+            <h3>Alimentação</h3>
+
+            <p><b>Frequência:</b> 2 vezes por semana</p>
+
+            <ul>
+                <li>Colocar xarope</li>
+                <li>Colocar mel de ápice</li>
+                <li>Colocar bombom de pólen</li>
+                <li>Colocar cera</li>
+            </ul>
+
+            <br>
+
+            <label>Responsável:</label>
+            <input type="text">
+
+            <br><br>
+
+            <label>Colmeias alimentadas:</label>
+            <textarea rows="4"></textarea>
+
+            <br><br>
+
+            <label>Observações:</label>
+            <textarea rows="4"></textarea>
+
+        </div>
+        `;
+    }
+
+    if(tipo === "limpezaInterna"){
+
+        html = `
+        <div class="card">
+
+            <h3>Limpeza Interna</h3>
+
+            <p><b>Frequência:</b> 1 vez por mês</p>
+
+            <ul>
+                <li>Verificar predadores</li>
+                <li>Verificar lixeira</li>
+            </ul>
+
+        </div>
+        `;
+    }
+
+    if(tipo === "limpezaExterna"){
+
+        html = `
+        <div class="card">
+
+            <h3>Limpeza Externa</h3>
+
+            <p><b>Frequência:</b> 25 a 40 dias</p>
+
+            <ul>
+                <li>Limpeza do meliponário</li>
+                <li>Capina</li>
+                <li>Poda</li>
+            </ul>
+
+        </div>
+        `;
+    }
+
+    if(tipo === "revisaoInterna"){
+
+        html = `
+        <div class="card">
+
+            <h3>Revisão Interna</h3>
+
+            <p><b>Frequência:</b> 15 a 25 dias</p>
+
+            <ul>
+                <li>Adicionar módulo</li>
+                <li>Retirar módulo</li>
+                <li>Troca de caixa</li>
+                <li>Genótipo</li>
+                <li>Avaliar divisão</li>
+                <li>Avaliar multiplicação</li>
+                <li>Avaliar colheita</li>
+                <li>Produção de própolis</li>
+            </ul>
+
+        </div>
+        `;
+    }
+
+    if(tipo === "revisaoExterna"){
+
+        html = `
+        <div class="card">
+
+            <h3>Revisão Externa</h3>
+
+            <p><b>Frequência:</b> Diária</p>
+
+            <ul>
+                <li>Condição da madeira</li>
+                <li>Condição do telhado</li>
+                <li>Identificação da colmeia</li>
+            </ul>
+
+        </div>
+        `;
+    }
+
+    conteudo.innerHTML = html;
+}
+
+function abrirCadastroColmeias(){
+
+    document
+    .getElementById("conteudoAtividade")
+    .innerHTML = `
+    <div class="card">
+
+        <h3>Cadastro de Colmeias</h3>
+
+        <input placeholder="Código">
+
+        <br><br>
+
+        <input placeholder="Espécie">
+
+        <br><br>
+
+        <input placeholder="Localização">
+
+        <br><br>
+
+        <textarea
+        placeholder="Observações">
+        </textarea>
+
+    </div>
+    `;
+}
