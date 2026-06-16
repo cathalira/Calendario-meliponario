@@ -1,0 +1,88 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Segoe UI;
+    background:#f4f6f5;
+}
+
+header{
+    background:#2e7d32;
+    color:white;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+main{
+    padding:20px;
+}
+
+.painel-geral{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:10px;
+    text-align:center;
+}
+
+.categoria{
+    cursor:pointer;
+}
+
+.categoria:hover{
+    background:#e8f5e9;
+}
+
+.hidden{
+    display:none;
+}
+
+#meliponario{
+    margin-top:20px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+.atividades{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:15px;
+}
+
+button{
+    background:#2e7d32;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1b5e20;
+}
+
+.card{
+    margin-top:20px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:20px;
+}
