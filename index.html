@@ -77,6 +77,9 @@
                     <a href="#" class="menu-item" onclick="mostrarTela('acoes')">
                         🐝 <span>Rel. Ações</span>
                 </a>
+<a href="#" class="menu-item" onclick="mostrarTela('estoque')">
+                    📦 <span>Estoque</span>
+                </a>
                 <a href="#" class="menu-item" onclick="mostrarTela('relatorios')">
                     📊 <span>Relatórios</span>
                 </a>
@@ -132,6 +135,7 @@
                     </div>
                 </div>
                 <div id="resumoGeral" class="resumo-geral"></div>
+                <div id="alertaEstoque"></div>
             </div>
 
             <!-- TELA: CATEGORIA -->
@@ -381,7 +385,80 @@
     </div>
     <div id="resultadoAcoes"></div>
 </div>
-        </main>
+<!-- TELA: ESTOQUE -->
+            <div id="tela-estoque" class="tela">
+                <div class="tela-header">
+                    <h1>📦 Estoque</h1>
+                </div>
+                <div class="card estoque-categorias">
+                    <div id="abasCategoriaEstoque" class="abas-estoque"></div>
+                </div>
+                <div id="formEstoqueItem" class="card hidden">
+                    <h3 id="tituloFormEstoque">Novo Item</h3>
+                    <input type="hidden" id="estoqueItemEditandoId">
+                    <div class="form-grid">
+                        <div class="form-campo">
+                            <label>Nome do produto</label>
+                            <input type="text" id="estoqueItemNome" placeholder="Ex: Caixa modelo 7">
+                        </div>
+                        <div class="form-campo">
+                            <label>Quantidade atual</label>
+                            <input type="number" id="estoqueItemQtdAtual" min="0" value="0">
+                        </div>
+                        <div class="form-campo">
+                            <label>Quantidade mínima</label>
+                            <input type="number" id="estoqueItemQtdMinima" min="0" value="0">
+                        </div>
+                        <div class="form-campo">
+                            <label>Unidade</label>
+                            <input type="text" id="estoqueItemUnidade" placeholder="Ex: unid, kg, litro" value="unid">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:12px">
+                        <button onclick="salvarItemEstoque()">💾 Salvar</button>
+                        <button class="btn-voltar" onclick="fecharFormEstoque()">Cancelar</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                        <h3 id="tituloEstoqueCategoria">Selecione uma categoria</h3>
+                        <button id="btnNovoItemEstoque" onclick="abrirFormEstoque()" class="hidden">➕ Novo Item</button>
+                    </div>
+                    <div id="tabelaEstoque"></div>
+                </div>
+                <div id="modalEntradaEstoque" class="modal hidden">
+                    <div class="modal-box">
+                        <h3>📥 Registrar Entrada</h3>
+                        <input type="hidden" id="entradaItemId">
+                        <div class="form-campo">
+                            <label>Quantidade</label>
+                            <input type="number" id="entradaQtd" min="1" placeholder="Quantidade">
+                        </div>
+                        <div class="form-campo">
+                            <label>Motivo</label>
+                            <input type="text" id="entradaMotivo" placeholder="Ex: Compra de fornecedor">
+                        </div>
+                        <div class="form-campo">
+                            <label>Observação</label>
+                            <input type="text" id="entradaObservacao" placeholder="Observação opcional">
+                        </div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalEntrada()">Cancelar</button>
+                            <button onclick="confirmarEntrada()">✅ Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="modalHistoricoEstoque" class="modal hidden">
+                    <div class="modal-box" style="width:520px;max-width:95vw">
+                        <h3 id="tituloHistoricoEstoque">Histórico</h3>
+                        <div id="listaHistoricoEstoque" style="max-height:360px;overflow-y:auto;margin:16px 0"></div>
+                        <div class="modal-botoes">
+                            <button class="btn-voltar" onclick="fecharModalHistorico()">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>        
+</main>
     </div>
     <!-- MODAL NOVA VISTORIA -->
 <div id="modalNovaVistoria" class="modal hidden">
