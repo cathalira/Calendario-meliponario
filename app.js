@@ -547,6 +547,17 @@ async function salvarRegistro(dataStr, registroIdExistente) {
 async function excluirRegistro(registroId) {
     if (!confirm('Tem certeza que deseja excluir este registro?')) return;
     try {
+        // Apaga primeiro os dados dependentes (checklist e campos de texto),
+        // já que o banco bloqueia a exclusão do registro pai enquanto eles existirem (erro 409/FK)
+        const respsChecklist = await db.query('checklist_respostas', `registro_id=eq.${registroId}`);
+        for (const r of respsChecklist) {
+            await db.deletar('checklist_respostas', r.id);
+        }
+        const respsCampos = await db.query('campos_texto_respostas', `registro_id=eq.${registroId}`);
+        for (const r of respsCampos) {
+            await db.deletar('campos_texto_respostas', r.id);
+        }
+
         await db.deletar('registros', registroId);
         registros = registros.filter(r => r.id !== registroId);
         diaSelecionado = null;
@@ -554,7 +565,7 @@ async function excluirRegistro(registroId) {
         document.getElementById('colunaFormulario').innerHTML = `
             <div class="card placeholder-formulario"><p>👆 Clique em um dia no calendário para registrar a atividade</p></div>`;
         mostrarToast('Registro excluído');
-    } catch(e) { mostrarToast('Erro ao excluir registro', true); }
+    } catch(e) { mostrarToast('Erro ao excluir registro', true); console.error(e); }
 }
 
 function renderizarHistorico() {
