@@ -178,7 +178,17 @@ function mostrarTela(nome) {
     if (tela) tela.classList.add('ativa');
     if (nome === 'admin') { if (!adminLiberado) { mostrarModalSenha(); return; } renderizarAdmin(); }
     if (nome === 'dashboard') renderizarDashboard();
-    if (nome === 'relatorios') carregarRelatorios();
+    if (nome === 'relatorios') {
+        carregarRelatorios();
+        setTimeout(() => {
+            const hoje = new Date();
+            const trinta = new Date();
+            trinta.setDate(hoje.getDate() - 30);
+            document.getElementById('filtroDe').value = trinta.toISOString().split('T')[0];
+            document.getElementById('filtroAte').value = hoje.toISOString().split('T')[0];
+            gerarRelatorio();
+        }, 100);
+    }
     if (nome === 'colmeias') renderizarColmeias();
     if (nome === 'acoes') {
         setTimeout(() => {
