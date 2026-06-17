@@ -1737,6 +1737,11 @@ function renderizarTabelaEstoque() {
         itens = itens.filter(i => i.setor_id === setorSelecionadoEstoque.id);
     }
 
+    // Ordena por nome (alfabética, ignorando maiúsculas/minúsculas e acentos)
+    itens = itens.slice().sort((a, b) =>
+        (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' })
+    );
+
     if (itens.length === 0) {
         container.innerHTML = '<p style="color:#999;text-align:center;padding:20px">Nenhum item cadastrado nesta categoria/setor.</p>';
         return;
@@ -1960,7 +1965,10 @@ function fecharModalHistorico() {
 function renderizarAlertaEstoque() {
     const container = document.getElementById('alertaEstoque');
     if (!container) return;
-    const itensBaixos = estoqueItens.filter(i => i.quantidade_atual <= i.quantidade_minima);
+    const itensBaixos = estoqueItens
+        .filter(i => i.quantidade_atual <= i.quantidade_minima)
+        .slice()
+        .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
     if (itensBaixos.length === 0) { container.innerHTML = ''; return; }
     container.innerHTML = `
         <div class="card alerta-estoque-card">
