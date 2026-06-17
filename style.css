@@ -72,7 +72,7 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--cinza-fundo); colo
 
 #menuLateral {
     width: var(--menu-largura);
-    min-height: 100vh;
+    height: 100vh;
     background: var(--verde-escuro);
     display: flex;
     flex-direction: column;
