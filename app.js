@@ -1107,7 +1107,7 @@ function renderizarAdmin() {
     // Categorias
     document.getElementById('listaCategorias').innerHTML = categorias.length === 0
         ? '<div style="color:#999;font-size:13px">Nenhuma categoria</div>'
-        : categorias.map(c => `<div class="admin-item"><span>${c.icone || ''} ${c.nome}</span><button class="btn-excluir" onclick="excluirCategoria('${c.id}')">🗑️</button></div>`).join('');
+        : categorias.map(c => `<div class="admin-item"><span>${c.icone || ''} ${c.nome}</span><span><button class="btn-editar" onclick="editarCategoria('${c.id}')">✏️</button><button class="btn-excluir" onclick="excluirCategoria('${c.id}')">🗑️</button></span></div>`).join('');
 
     // Atividades
     document.getElementById('listaAtividadesAdmin').innerHTML = atividades.length === 0
@@ -1117,7 +1117,7 @@ function renderizarAdmin() {
             const setor = setores.find(s => s.id === a.setor_id);
             const label = setor ? `${cat?.icone || ''} ${cat?.nome} › ${setor.icone || ''} ${setor.nome} — ${a.nome}`
                                 : `${cat?.icone || ''} ${cat?.nome || '?'} — ${a.nome}`;
-            return `<div class="admin-item"><span>${label}</span><button class="btn-excluir" onclick="excluirAtividade('${a.id}')">🗑️</button></div>`;
+            return `<div class="admin-item"><span>${label}</span><span><button class="btn-editar" onclick="editarAtividade('${a.id}')">✏️</button><button class="btn-excluir" onclick="excluirAtividade('${a.id}')">🗑️</button></span></div>`;
         }).join('');
 
     // Selects de categoria
@@ -1137,7 +1137,7 @@ function renderizarAdmin() {
 }
 
 // =============================================
-// SETORES — ADMIN
+// SETORES — ADMIN (com edição)
 // =============================================
 function carregarSetoresAdmin() {
     const categoriaId = document.getElementById('filtroCategoriaStor').value;
@@ -1151,28 +1151,54 @@ function carregarSetoresAdmin() {
         : setoresDaCategoria.map(s => `
             <div class="admin-item">
                 <span>${s.icone || ''} ${s.nome}</span>
-                <button class="btn-excluir" onclick="excluirSetor('${s.id}')">🗑️</button>
+                <span><button class="btn-editar" onclick="editarSetor('${s.id}')">✏️</button><button class="btn-excluir" onclick="excluirSetor('${s.id}')">🗑️</button></span>
             </div>`).join('');
 }
 
+function editarSetor(id) {
+    const setor = setores.find(s => s.id === id);
+    if (!setor) return;
+    document.getElementById('setorEditandoId').value = setor.id;
+    document.getElementById('novoIconeSetor').value = setor.icone || '';
+    document.getElementById('novoNomeSetor').value = setor.nome || '';
+    document.getElementById('tituloFormSetor').textContent = 'Editar Setor';
+    document.getElementById('btnSalvarSetor').textContent = '💾 Salvar';
+    document.getElementById('btnCancelarSetor').classList.remove('hidden');
+}
+
+function cancelarEdicaoSetor() {
+    document.getElementById('setorEditandoId').value = '';
+    document.getElementById('novoIconeSetor').value = '';
+    document.getElementById('novoNomeSetor').value = '';
+    document.getElementById('tituloFormSetor').textContent = 'Novo Setor';
+    document.getElementById('btnSalvarSetor').textContent = '➕ Adicionar';
+    document.getElementById('btnCancelarSetor').classList.add('hidden');
+}
+
 async function adicionarSetor() {
+    const editandoId = document.getElementById('setorEditandoId').value;
     const categoriaId = document.getElementById('filtroCategoriaStor').value;
     const icone = document.getElementById('novoIconeSetor').value.trim();
     const nome  = document.getElementById('novoNomeSetor').value.trim();
     if (!categoriaId) { mostrarToast('Selecione a categoria', true); return; }
     if (!nome) { mostrarToast('Preencha o nome do setor', true); return; }
-    const ordemAtual = setores.filter(s => s.categoria_id === categoriaId).length;
     try {
-        const novo = await db.inserir('setores', { categoria_id: categoriaId, nome, icone, ordem: ordemAtual });
-        setores.push(novo);
-        document.getElementById('novoIconeSetor').value = '';
-        document.getElementById('novoNomeSetor').value = '';
+        if (editandoId) {
+            await db.atualizar('setores', editandoId, { nome, icone });
+            const idx = setores.findIndex(s => s.id === editandoId);
+            if (idx !== -1) { setores[idx].nome = nome; setores[idx].icone = icone; }
+            mostrarToast(`✅ Setor "${nome}" atualizado!`);
+        } else {
+            const ordemAtual = setores.filter(s => s.categoria_id === categoriaId).length;
+            const novo = await db.inserir('setores', { categoria_id: categoriaId, nome, icone, ordem: ordemAtual });
+            setores.push(novo);
+            mostrarToast(`✅ Setor "${nome}" adicionado!`);
+        }
+        cancelarEdicaoSetor();
         carregarSetoresAdmin();
-        // Atualiza select de setores na nova atividade caso a categoria seja a mesma
         atualizarSetoresNovaAtividade();
         renderizarCalendarioGeral();
-        mostrarToast(`✅ Setor "${nome}" adicionado!`);
-    } catch(e) { mostrarToast('Erro ao adicionar setor', true); console.error(e); }
+    } catch(e) { mostrarToast('Erro ao salvar setor', true); console.error(e); }
 }
 
 async function excluirSetor(id) {
@@ -1186,6 +1212,7 @@ async function excluirSetor(id) {
     try {
         await db.deletar('setores', id);
         setores = setores.filter(s => s.id !== id);
+        if (document.getElementById('setorEditandoId').value === id) cancelarEdicaoSetor();
         carregarSetoresAdmin();
         atualizarSetoresNovaAtividade();
         renderizarCalendarioGeral();
@@ -1211,9 +1238,32 @@ function atualizarSetoresNovaAtividade() {
 }
 
 // =============================================
-// ATIVIDADES — ADMIN
+// CATEGORIAS — ADMIN (com edição)
 // =============================================
+function editarCategoria(id) {
+    const cat = categorias.find(c => c.id === id);
+    if (!cat) return;
+    document.getElementById('categoriaEditandoId').value = cat.id;
+    document.getElementById('novoIconeCategoria').value = cat.icone || '';
+    document.getElementById('novoNomeCategoria').value = cat.nome || '';
+    document.getElementById('tituloFormCategoria').textContent = 'Editar Categoria';
+    document.getElementById('btnSalvarCategoria').textContent = '💾 Salvar';
+    document.getElementById('btnCancelarCategoria').classList.remove('hidden');
+    document.getElementById('listaCategorias').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cancelarEdicaoCategoria() {
+    document.getElementById('categoriaEditandoId').value = '';
+    document.getElementById('novoIconeCategoria').value = '';
+    document.getElementById('novoNomeCategoria').value = '';
+    document.getElementById('novaImagemCategoria').value = '';
+    document.getElementById('tituloFormCategoria').textContent = 'Nova Categoria';
+    document.getElementById('btnSalvarCategoria').textContent = '➕ Adicionar';
+    document.getElementById('btnCancelarCategoria').classList.add('hidden');
+}
+
 async function adicionarCategoria() {
+    const editandoId = document.getElementById('categoriaEditandoId').value;
     const icone = document.getElementById('novoIconeCategoria').value.trim();
     const nome = document.getElementById('novoNomeCategoria').value.trim();
     if (!nome) { mostrarToast('Preencha o nome', true); return; }
@@ -1227,13 +1277,21 @@ async function adicionarCategoria() {
         });
     }
     try {
-        const nova = await db.inserir('categorias', { nome, icone, imagem: imagemBase64 || null });
-        categorias.push(nova);
-        document.getElementById('novoIconeCategoria').value = '';
-        document.getElementById('novoNomeCategoria').value = '';
+        if (editandoId) {
+            const dados = { nome, icone };
+            if (imagemBase64) dados.imagem = imagemBase64;
+            await db.atualizar('categorias', editandoId, dados);
+            const idx = categorias.findIndex(c => c.id === editandoId);
+            if (idx !== -1) categorias[idx] = { ...categorias[idx], ...dados };
+            mostrarToast(`✅ Categoria "${nome}" atualizada!`);
+        } else {
+            const nova = await db.inserir('categorias', { nome, icone, imagem: imagemBase64 || null });
+            categorias.push(nova);
+            mostrarToast(`✅ Categoria "${nome}" adicionada!`);
+        }
+        cancelarEdicaoCategoria();
         renderizarAdmin(); renderizarMenuCategorias(); renderizarCalendarioGeral();
-        mostrarToast(`✅ Categoria "${nome}" adicionada!`);
-    } catch(e) { mostrarToast('Erro ao adicionar categoria', true); }
+    } catch(e) { mostrarToast('Erro ao salvar categoria', true); console.error(e); }
 }
 
 async function excluirCategoria(id) {
@@ -1242,13 +1300,45 @@ async function excluirCategoria(id) {
         await db.deletar('categorias', id);
         categorias = categorias.filter(c => c.id !== id);
         atividades = atividades.filter(a => a.categoria_id !== id);
-        setores    = setores.filter(s => s.categoria_id !== id);  // NOVO
+        setores    = setores.filter(s => s.categoria_id !== id);
+        if (document.getElementById('categoriaEditandoId').value === id) cancelarEdicaoCategoria();
         renderizarAdmin(); renderizarMenuCategorias(); renderizarCalendarioGeral();
         mostrarToast('Categoria excluída');
     } catch(e) { mostrarToast('Erro ao excluir', true); }
 }
 
+function editarAtividade(id) {
+    const a = atividades.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('atividadeEditandoId').value = a.id;
+    document.getElementById('categoriaNovaAtividade').value = a.categoria_id || '';
+    atualizarSetoresNovaAtividade();
+    document.getElementById('setorNovaAtividade').value = a.setor_id || '';
+    document.getElementById('novoNomeAtividade').value = a.nome || '';
+    document.getElementById('novaFrequencia').value = a.frequencia || '';
+    document.getElementById('novaUsaColmeias').checked = !!a.usa_colmeias;
+    document.getElementById('novaUsaChecklist').checked = !!a.usa_checklist;
+    document.getElementById('tituloFormAtividade').textContent = 'Editar Atividade';
+    document.getElementById('btnSalvarAtividade').textContent = '💾 Salvar';
+    document.getElementById('btnCancelarAtividade').classList.remove('hidden');
+    document.getElementById('listaAtividadesAdmin').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cancelarEdicaoAtividade() {
+    document.getElementById('atividadeEditandoId').value = '';
+    document.getElementById('categoriaNovaAtividade').value = '';
+    document.getElementById('setorNovaAtividade').classList.add('hidden');
+    document.getElementById('novoNomeAtividade').value = '';
+    document.getElementById('novaFrequencia').value = '';
+    document.getElementById('novaUsaColmeias').checked = false;
+    document.getElementById('novaUsaChecklist').checked = true;
+    document.getElementById('tituloFormAtividade').textContent = 'Nova Atividade';
+    document.getElementById('btnSalvarAtividade').textContent = '➕ Adicionar';
+    document.getElementById('btnCancelarAtividade').classList.add('hidden');
+}
+
 async function adicionarAtividade() {
+    const editandoId  = document.getElementById('atividadeEditandoId').value;
     const categoriaId = document.getElementById('categoriaNovaAtividade').value;
     const setorId     = document.getElementById('setorNovaAtividade').value || null;
     const nome        = document.getElementById('novoNomeAtividade').value.trim();
@@ -1257,20 +1347,27 @@ async function adicionarAtividade() {
     const usaChecklist = document.getElementById('novaUsaChecklist').checked;
     if (!categoriaId) { mostrarToast('Selecione a categoria', true); return; }
     if (!nome) { mostrarToast('Preencha o nome', true); return; }
+    const dados = {
+        categoria_id: categoriaId,
+        setor_id: setorId,
+        nome, frequencia,
+        usa_colmeias: usaColmeias,
+        usa_checklist: usaChecklist
+    };
     try {
-        const nova = await db.inserir('atividades', {
-            categoria_id: categoriaId,
-            setor_id: setorId,              // NOVO
-            nome, frequencia,
-            usa_colmeias: usaColmeias,
-            usa_checklist: usaChecklist
-        });
-        atividades.push(nova);
-        document.getElementById('novoNomeAtividade').value = '';
-        document.getElementById('novaFrequencia').value = '';
+        if (editandoId) {
+            await db.atualizar('atividades', editandoId, dados);
+            const idx = atividades.findIndex(a => a.id === editandoId);
+            if (idx !== -1) atividades[idx] = { ...atividades[idx], ...dados };
+            mostrarToast(`✅ Atividade "${nome}" atualizada!`);
+        } else {
+            const nova = await db.inserir('atividades', dados);
+            atividades.push(nova);
+            mostrarToast(`✅ Atividade "${nome}" adicionada!`);
+        }
+        cancelarEdicaoAtividade();
         renderizarAdmin(); renderizarCalendarioGeral();
-        mostrarToast(`✅ Atividade "${nome}" adicionada!`);
-    } catch(e) { mostrarToast('Erro ao adicionar atividade', true); }
+    } catch(e) { mostrarToast('Erro ao salvar atividade', true); console.error(e); }
 }
 
 async function excluirAtividade(id) {
@@ -1280,6 +1377,7 @@ async function excluirAtividade(id) {
         atividades = atividades.filter(a => a.id !== id);
         checklistItens = checklistItens.filter(i => i.atividade_id !== id);
         registros = registros.filter(r => r.atividade_id !== id);
+        if (document.getElementById('atividadeEditandoId').value === id) cancelarEdicaoAtividade();
         renderizarAdmin(); renderizarCalendarioGeral();
         mostrarToast('Atividade excluída');
     } catch(e) { mostrarToast('Erro ao excluir', true); }
@@ -1292,21 +1390,47 @@ function carregarChecklistAdmin() {
     const itens = checklistItens.filter(i => i.atividade_id === atividadeId);
     container.innerHTML = itens.length === 0
         ? '<div style="color:#999;font-size:13px">Nenhum item</div>'
-        : itens.map(item => `<div class="admin-item"><span>${item.descricao}</span><button class="btn-excluir" onclick="excluirItemChecklist('${item.id}')">🗑️</button></div>`).join('');
+        : itens.map(item => `<div class="admin-item"><span>${item.descricao}</span><span><button class="btn-editar" onclick="editarItemChecklist('${item.id}')">✏️</button><button class="btn-excluir" onclick="excluirItemChecklist('${item.id}')">🗑️</button></span></div>`).join('');
+}
+
+function editarItemChecklist(id) {
+    const item = checklistItens.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('itemChecklistEditandoId').value = item.id;
+    document.getElementById('novoItemChecklist').value = item.descricao || '';
+    document.getElementById('tituloFormChecklist').textContent = 'Editar Item';
+    document.getElementById('btnSalvarChecklist').textContent = '💾 Salvar';
+    document.getElementById('btnCancelarChecklist').classList.remove('hidden');
+}
+
+function cancelarEdicaoChecklist() {
+    document.getElementById('itemChecklistEditandoId').value = '';
+    document.getElementById('novoItemChecklist').value = '';
+    document.getElementById('tituloFormChecklist').textContent = 'Novo Item';
+    document.getElementById('btnSalvarChecklist').textContent = '➕ Adicionar';
+    document.getElementById('btnCancelarChecklist').classList.add('hidden');
 }
 
 async function adicionarItemChecklist() {
+    const editandoId = document.getElementById('itemChecklistEditandoId').value;
     const atividadeId = document.getElementById('atividadeChecklist').value;
     const descricao = document.getElementById('novoItemChecklist').value.trim();
     if (!atividadeId) { mostrarToast('Selecione a atividade', true); return; }
     if (!descricao) { mostrarToast('Preencha a descrição', true); return; }
     try {
-        const novo = await db.inserir('checklist_itens', { atividade_id: atividadeId, descricao });
-        checklistItens.push(novo);
-        document.getElementById('novoItemChecklist').value = '';
+        if (editandoId) {
+            await db.atualizar('checklist_itens', editandoId, { descricao });
+            const idx = checklistItens.findIndex(i => i.id === editandoId);
+            if (idx !== -1) checklistItens[idx].descricao = descricao;
+            mostrarToast('✅ Item atualizado!');
+        } else {
+            const novo = await db.inserir('checklist_itens', { atividade_id: atividadeId, descricao });
+            checklistItens.push(novo);
+            mostrarToast('✅ Item adicionado!');
+        }
+        cancelarEdicaoChecklist();
         carregarChecklistAdmin();
-        mostrarToast(`✅ Item adicionado!`);
-    } catch(e) { mostrarToast('Erro ao adicionar item', true); }
+    } catch(e) { mostrarToast('Erro ao salvar item', true); console.error(e); }
 }
 
 async function excluirItemChecklist(id) {
@@ -1314,6 +1438,7 @@ async function excluirItemChecklist(id) {
     try {
         await db.deletar('checklist_itens', id);
         checklistItens = checklistItens.filter(i => i.id !== id);
+        if (document.getElementById('itemChecklistEditandoId').value === id) cancelarEdicaoChecklist();
         carregarChecklistAdmin();
         mostrarToast('Item excluído');
     } catch(e) { mostrarToast('Erro ao excluir item', true); }
@@ -1332,7 +1457,7 @@ function mostrarToast(msg, erro = false) {
 function popularSelects() { carregarRelatorios(); }
 
 // =============================================
-// CAMPOS DE TEXTO LIVRE
+// CAMPOS DE TEXTO LIVRE (com edição)
 // =============================================
 function carregarCamposTextoAdmin() {
     const atividadeId = document.getElementById('atividadeCamposTexto').value;
@@ -1341,21 +1466,47 @@ function carregarCamposTextoAdmin() {
     const campos = camposTexto.filter(c => c.atividade_id === atividadeId);
     container.innerHTML = campos.length === 0
         ? '<div style="color:#999;font-size:13px">Nenhum campo</div>'
-        : campos.map(c => `<div class="admin-item"><span>${c.label}</span><button class="btn-excluir" onclick="excluirCampoTexto('${c.id}')">🗑️</button></div>`).join('');
+        : campos.map(c => `<div class="admin-item"><span>${c.label}</span><span><button class="btn-editar" onclick="editarCampoTexto('${c.id}')">✏️</button><button class="btn-excluir" onclick="excluirCampoTexto('${c.id}')">🗑️</button></span></div>`).join('');
+}
+
+function editarCampoTexto(id) {
+    const campo = camposTexto.find(c => c.id === id);
+    if (!campo) return;
+    document.getElementById('campoTextoEditandoId').value = campo.id;
+    document.getElementById('novoLabelCampoTexto').value = campo.label || '';
+    document.getElementById('tituloFormCampoTexto').textContent = 'Editar Campo';
+    document.getElementById('btnSalvarCampoTexto').textContent = '💾 Salvar';
+    document.getElementById('btnCancelarCampoTexto').classList.remove('hidden');
+}
+
+function cancelarEdicaoCampoTexto() {
+    document.getElementById('campoTextoEditandoId').value = '';
+    document.getElementById('novoLabelCampoTexto').value = '';
+    document.getElementById('tituloFormCampoTexto').textContent = 'Novo Campo';
+    document.getElementById('btnSalvarCampoTexto').textContent = '➕ Adicionar';
+    document.getElementById('btnCancelarCampoTexto').classList.add('hidden');
 }
 
 async function adicionarCampoTexto() {
+    const editandoId = document.getElementById('campoTextoEditandoId').value;
     const atividadeId = document.getElementById('atividadeCamposTexto').value;
     const label = document.getElementById('novoLabelCampoTexto').value.trim();
     if (!atividadeId) { mostrarToast('Selecione a atividade', true); return; }
     if (!label) { mostrarToast('Preencha o nome do campo', true); return; }
     try {
-        const novo = await db.inserir('campos_texto', { atividade_id: atividadeId, label });
-        camposTexto.push(novo);
-        document.getElementById('novoLabelCampoTexto').value = '';
+        if (editandoId) {
+            await db.atualizar('campos_texto', editandoId, { label });
+            const idx = camposTexto.findIndex(c => c.id === editandoId);
+            if (idx !== -1) camposTexto[idx].label = label;
+            mostrarToast('✅ Campo atualizado!');
+        } else {
+            const novo = await db.inserir('campos_texto', { atividade_id: atividadeId, label });
+            camposTexto.push(novo);
+            mostrarToast('✅ Campo adicionado!');
+        }
+        cancelarEdicaoCampoTexto();
         carregarCamposTextoAdmin();
-        mostrarToast('✅ Campo adicionado!');
-    } catch(e) { mostrarToast('Erro ao adicionar campo', true); }
+    } catch(e) { mostrarToast('Erro ao salvar campo', true); console.error(e); }
 }
 
 async function excluirCampoTexto(id) {
@@ -1363,6 +1514,7 @@ async function excluirCampoTexto(id) {
     try {
         await db.deletar('campos_texto', id);
         camposTexto = camposTexto.filter(c => c.id !== id);
+        if (document.getElementById('campoTextoEditandoId').value === id) cancelarEdicaoCampoTexto();
         carregarCamposTextoAdmin();
         mostrarToast('Campo excluído');
     } catch(e) { mostrarToast('Erro ao excluir campo', true); }

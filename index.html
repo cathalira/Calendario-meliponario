@@ -284,12 +284,14 @@
                         <h3>📁 Categorias</h3>
                         <div id="listaCategorias" class="admin-lista"></div>
                         <hr>
-                        <h4>Nova Categoria</h4>
+                        <h4 id="tituloFormCategoria">Nova Categoria</h4>
+                        <input type="hidden" id="categoriaEditandoId">
                         <div class="form-inline">
                             <input type="text" id="novoIconeCategoria" placeholder="Ícone (ex: 🌱)" maxlength="2">
                             <input type="file" id="novaImagemCategoria" accept="image/*" style="font-size:12px;margin-top:4px">
                             <input type="text" id="novoNomeCategoria" placeholder="Nome da categoria">
-                            <button onclick="adicionarCategoria()">➕ Adicionar</button>
+                            <button id="btnSalvarCategoria" onclick="adicionarCategoria()">➕ Adicionar</button>
+                            <button id="btnCancelarCategoria" class="btn-voltar hidden" onclick="cancelarEdicaoCategoria()">Cancelar</button>
                         </div>
                     </div>
 
@@ -307,11 +309,13 @@
                         </div>
                         <div id="listaSetoresAdmin" class="admin-lista"></div>
                         <hr>
-                        <h4>Novo Setor</h4>
+                        <h4 id="tituloFormSetor">Novo Setor</h4>
+                        <input type="hidden" id="setorEditandoId">
                         <div class="form-inline">
                             <input type="text" id="novoIconeSetor" placeholder="Ícone (ex: 🪵)" maxlength="4">
                             <input type="text" id="novoNomeSetor" placeholder="Nome do setor">
-                            <button onclick="adicionarSetor()">➕ Adicionar</button>
+                            <button id="btnSalvarSetor" onclick="adicionarSetor()">➕ Adicionar</button>
+                            <button id="btnCancelarSetor" class="btn-voltar hidden" onclick="cancelarEdicaoSetor()">Cancelar</button>
                         </div>
                     </div>
 
@@ -320,7 +324,8 @@
                         <h3>📋 Atividades</h3>
                         <div id="listaAtividadesAdmin" class="admin-lista"></div>
                         <hr>
-                        <h4>Nova Atividade</h4>
+                        <h4 id="tituloFormAtividade">Nova Atividade</h4>
+                        <input type="hidden" id="atividadeEditandoId">
                         <div class="form-grupo">
                             <select id="categoriaNovaAtividade" onchange="atualizarSetoresNovaAtividade()">
                                 <option value="">Selecione a categoria</option>
@@ -335,7 +340,10 @@
                                 <label><input type="checkbox" id="novaUsaColmeias"> Usa campo de colmeias</label>
                                 <label><input type="checkbox" id="novaUsaChecklist" checked> Usa checklist</label>
                             </div>
-                            <button onclick="adicionarAtividade()">➕ Adicionar</button>
+                            <div style="display:flex;gap:8px">
+                                <button id="btnSalvarAtividade" onclick="adicionarAtividade()" style="flex:1">➕ Adicionar</button>
+                                <button id="btnCancelarAtividade" class="btn-voltar hidden" onclick="cancelarEdicaoAtividade()">Cancelar</button>
+                            </div>
                         </div>
                     </div>
 
@@ -349,10 +357,12 @@
                         </div>
                         <div id="listaCamposTextoAdmin" class="admin-lista"></div>
                         <hr>
-                        <h4>Novo Campo</h4>
+                        <h4 id="tituloFormCampoTexto">Novo Campo</h4>
+                        <input type="hidden" id="campoTextoEditandoId">
                         <div class="form-inline">
                             <input type="text" id="novoLabelCampoTexto" placeholder="Nome do campo (ex: Data de instalação)">
-                            <button onclick="adicionarCampoTexto()">➕ Adicionar</button>
+                            <button id="btnSalvarCampoTexto" onclick="adicionarCampoTexto()">➕ Adicionar</button>
+                            <button id="btnCancelarCampoTexto" class="btn-voltar hidden" onclick="cancelarEdicaoCampoTexto()">Cancelar</button>
                         </div>
                     </div>
 
@@ -366,10 +376,12 @@
                         </div>
                         <div id="listaChecklistAdmin" class="admin-lista"></div>
                         <hr>
-                        <h4>Novo Item</h4>
+                        <h4 id="tituloFormChecklist">Novo Item</h4>
+                        <input type="hidden" id="itemChecklistEditandoId">
                         <div class="form-inline">
                             <input type="text" id="novoItemChecklist" placeholder="Descrição do item">
-                            <button onclick="adicionarItemChecklist()">➕ Adicionar</button>
+                            <button id="btnSalvarChecklist" onclick="adicionarItemChecklist()">➕ Adicionar</button>
+                            <button id="btnCancelarChecklist" class="btn-voltar hidden" onclick="cancelarEdicaoChecklist()">Cancelar</button>
                         </div>
                     </div>
                 </div>
