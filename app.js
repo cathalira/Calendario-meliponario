@@ -1885,14 +1885,13 @@ async function confirmarEntrada() {
     const motivo = document.getElementById('entradaMotivo').value.trim();
     const observacao = document.getElementById('entradaObservacao').value.trim();
     if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
-    if (!motivo) { mostrarToast('Informe o motivo da entrada', true); return; }
     try {
         const item = estoqueItens.find(i => i.id === itemId);
         const novaQtd = (item.quantidade_atual || 0) + qtd;
         await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
         item.quantidade_atual = novaQtd;
         const mov = await db.inserir('estoque_movimentacoes', {
-            item_id: itemId, tipo: 'entrada', quantidade: qtd, motivo,
+            item_id: itemId, tipo: 'entrada', quantidade: qtd, motivo: motivo || null,
             observacao: observacao || null,
             usuario_id: usuarioLogado ? usuarioLogado.id : null
         });
@@ -1930,7 +1929,6 @@ async function confirmarSaida() {
     const motivo = document.getElementById('saidaMotivo').value.trim();
     const observacao = document.getElementById('saidaObservacao').value.trim();
     if (!qtd || qtd <= 0) { mostrarToast('Informe uma quantidade válida', true); return; }
-    if (!motivo) { mostrarToast('Informe o motivo da saída', true); return; }
     try {
         const item = estoqueItens.find(i => i.id === itemId);
         if (qtd > item.quantidade_atual) { mostrarToast('Quantidade insuficiente em estoque', true); return; }
@@ -1938,7 +1936,7 @@ async function confirmarSaida() {
         await db.atualizar('estoque_itens', itemId, { quantidade_atual: novaQtd });
         item.quantidade_atual = novaQtd;
         const mov = await db.inserir('estoque_movimentacoes', {
-            item_id: itemId, tipo: 'saida', quantidade: qtd, motivo,
+            item_id: itemId, tipo: 'saida', quantidade: qtd, motivo: motivo || null,
             observacao: observacao || null,
             usuario_id: usuarioLogado ? usuarioLogado.id : null
         });
