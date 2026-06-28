@@ -604,10 +604,17 @@ function renderizarHistorico() {
 // =============================================
 function renderizarColmeias(lista = null) {
     const container = document.getElementById('tabelaColmeias');
-    // Ordena alfabeticamente por código
-    const dados = (lista || colmeias).slice().sort((a, b) =>
-        (a.codigo || '').localeCompare(b.codigo || '', 'pt-BR', { sensitivity: 'base' })
-    );
+    // Ordena por prefixo de letras do código, depois pelo número
+    const extrairCodigo = cod => {
+        const letras = (cod || '').replace(/[^A-Za-z]/g, '').toUpperCase();
+        const num = parseInt((cod || '').replace(/[^0-9]/g, '') || '0');
+        return [letras, num];
+    };
+    const dados = (lista || colmeias).slice().sort((a, b) => {
+        const [lA, nA] = extrairCodigo(a.codigo);
+        const [lB, nB] = extrairCodigo(b.codigo);
+        return lA.localeCompare(lB, 'pt-BR') || nA - nB;
+    });
     if (dados.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:20px">Nenhuma colmeia cadastrada.</p>';
         return;
