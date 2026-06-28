@@ -57,6 +57,13 @@ const ACOES = [
     { sigla: 'CI', descricao: 'Ninho provisório isca' }
 ];
 
+// Labels dos status de colmeia
+const STATUS_COLMEIA = {
+    boa:     'Boa',
+    atencao: 'Atenção',
+    critica: 'Crítica'
+};
+
 // =============================================
 // INICIALIZAÇÃO
 // =============================================
@@ -597,7 +604,10 @@ function renderizarHistorico() {
 // =============================================
 function renderizarColmeias(lista = null) {
     const container = document.getElementById('tabelaColmeias');
-    const dados = lista || colmeias;
+    // Ordena alfabeticamente por código
+    const dados = (lista || colmeias).slice().sort((a, b) =>
+        (a.codigo || '').localeCompare(b.codigo || '', 'pt-BR', { sensitivity: 'base' })
+    );
     if (dados.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:20px">Nenhuma colmeia cadastrada.</p>';
         return;
@@ -610,20 +620,19 @@ function renderizarColmeias(lista = null) {
             </tr></thead>
             <tbody>${dados.map(c => {
                 const vstColmeia = vistorias.filter(v => v.colmeia_id === c.id);
+                const status = c.status || 'boa';
+                const label = STATUS_COLMEIA[status] || status;
                 return `<tr>
                     <td><b>${c.codigo}</b></td>
-                    <td><span class="badge-status badge-${c.status || 'ativa'}">${c.status === 'inativa' ? 'Inativa' : 'Ativa'}</span></td>
+                    <td><span class="badge-status badge-${status}">${label}</span></td>
                     <td>${c.nome_popular || '—'}</td>
                     <td>${c.especie || '—'}</td>
                     <td>${c.localizacao || '—'}</td>
                     <td>${c.origem || '—'}</td>
                     <td>${vstColmeia.length} vistoria(s)</td>
                     <td>
-                        ${c.status === 'inativa'
-                            ? `<button class="btn-editar" disabled style="opacity:0.4;cursor:not-allowed">🔍 Ver</button>
-                               <button class="btn-editar" disabled style="opacity:0.4;cursor:not-allowed">📋 Vistoria</button>`
-                            : `<button class="btn-editar" onclick="abrirDetalheColmeia('${c.id}')">🔍 Ver</button>
-                               <button class="btn-editar" onclick="abrirVistoriaRapida('${c.id}')">📋 Vistoria</button>`}
+                        <button class="btn-editar" onclick="abrirDetalheColmeia('${c.id}')">🔍 Ver</button>
+                        <button class="btn-editar" onclick="abrirVistoriaRapida('${c.id}')">📋 Vistoria</button>
                         <button class="btn-editar" onclick="editarColmeia('${c.id}')">✏️</button>
                         <button class="btn-excluir-tabela" onclick="excluirColmeia('${c.id}')">🗑️</button>
                     </td>
@@ -640,7 +649,7 @@ function filtrarColmeias() {
         c.codigo?.toLowerCase().includes(busca) ||
         c.especie?.toLowerCase().includes(busca) ||
         c.nome_popular?.toLowerCase().includes(busca));
-    if (status) filtradas = filtradas.filter(c => (c.status || 'ativa') === status);
+    if (status) filtradas = filtradas.filter(c => (c.status || 'boa') === status);
     renderizarColmeias(filtradas);
 }
 
@@ -651,7 +660,7 @@ function abrirFormColmeia() {
     document.getElementById('colmeiaNomePopular').value = '';
     document.getElementById('colmeiaEspecie').value = '';
     document.getElementById('colmeiaLocalizacao').value = '';
-    document.getElementById('colmeiaStatus').value = 'ativa';
+    document.getElementById('colmeiaStatus').value = 'boa';
     document.getElementById('colmeiaObservacoes').value = '';
     document.getElementById('formColmeia').classList.remove('hidden');
     document.getElementById('detalheColmeia').classList.add('hidden');
@@ -667,7 +676,7 @@ function editarColmeia(id) {
     document.getElementById('colmeiaEspecie').value = c.especie || '';
     document.getElementById('colmeiaLocalizacao').value = c.localizacao || '';
     document.getElementById('colmeiaOrigem').value = c.origem || '';
-    document.getElementById('colmeiaStatus').value = c.status || 'ativa';
+    document.getElementById('colmeiaStatus').value = c.status || 'boa';
     document.getElementById('colmeiaObservacoes').value = c.observacoes || '';
     document.getElementById('formColmeia').classList.remove('hidden');
     document.getElementById('detalheColmeia').classList.add('hidden');
@@ -730,6 +739,9 @@ function abrirDetalheColmeia(id) {
     const vstColmeia = vistorias.filter(v => v.colmeia_id === id)
         .sort((a, b) => b.data.localeCompare(a.data));
 
+    const statusAtual = colmeiaAtual.status || 'boa';
+    const statusLabel = STATUS_COLMEIA[statusAtual] || statusAtual;
+
     detalhe.innerHTML = `
         <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -739,7 +751,7 @@ function abrirDetalheColmeia(id) {
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px;font-size:13px">
                 <div><b>Espécie:</b> ${colmeiaAtual.especie || '—'}</div>
                 <div><b>Localização:</b> ${colmeiaAtual.localizacao || '—'}</div>
-                <div><b>Status:</b> <span class="badge-status badge-${colmeiaAtual.status || 'ativa'}">${colmeiaAtual.status === 'inativa' ? 'Inativa' : 'Ativa'}</span></div>
+                <div><b>Status:</b> <span class="badge-status badge-${statusAtual}">${statusLabel}</span></div>
             </div>
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -1550,7 +1562,7 @@ function gerarRelatorioAcoes() {
 
     let vstFiltradas = vistorias.filter(v => {
         const colmeia = colmeias.find(c => c.id === v.colmeia_id);
-        if (!colmeia || colmeia.status === 'inativa') return false;
+        if (!colmeia) return false;
         if (de  && v.data < de)  return false;
         if (ate && v.data > ate) return false;
         return true;
@@ -1646,8 +1658,8 @@ function abrirVistoriaRapida(colmeiaId) {
 }
 
 function abrirModalNovaVistoria() {
-    const ativas = colmeias.filter(c => (c.status || 'ativa') === 'ativa');
-    if (ativas.length === 0) { mostrarToast('Nenhuma colmeia ativa cadastrada', true); return; }
+    const ativas = colmeias.slice(); // todas as colmeias aparecem para vistoria
+    if (ativas.length === 0) { mostrarToast('Nenhuma colmeia cadastrada', true); return; }
     const sel = document.getElementById('selectColmeiaVistoria');
     sel.value = '';
     const datalist = document.getElementById('listaColmeias');
@@ -1785,8 +1797,8 @@ function renderizarTabelaEstoque() {
                     <td><b>${item.quantidade_atual}</b></td>
                     <td>${item.quantidade_minima}</td>
                     <td>${abaixo
-                        ? '<span class="badge-status badge-inativa">⚠️ Baixo</span>'
-                        : '<span class="badge-status badge-ativa">✅ OK</span>'}</td>
+                        ? '<span class="badge-status badge-critica">⚠️ Baixo</span>'
+                        : '<span class="badge-status badge-boa">✅ OK</span>'}</td>
                     <td>
                         <button class="btn-editar" onclick="abrirModalEntrada('${item.id}')">📥 Entrada</button>
                         <button class="btn-editar" onclick="abrirModalSaida('${item.id}')">📤 Saída</button>

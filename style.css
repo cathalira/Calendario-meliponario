@@ -427,15 +427,28 @@ td:first-child { text-align: left; padding-left: 14px; font-weight: 500; white-s
 .tabela-colmeias td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
 .tabela-colmeias tr:hover td { background: var(--verde-suave); }
 
+/* ===========================
+   COLMEIAS — STATUS BADGES
+=========================== */
 .badge-status {
-    padding: 3px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
-.badge-ativa { background: #e8f5e9; color: #2e7d32; }
-.badge-inativa { background: #fce4ec; color: #c62828; }
+.badge-boa     { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.badge-atencao { background: #fff3e0; color: #bf360c; border: 1px solid #ffcc80; }
+.badge-critica { background: #fce4ec; color: #b71c1c; border: 1px solid #ef9a9a; }
+
+/* Bolinha colorida antes do texto */
+.badge-boa::before     { content: '●'; font-size: 9px; color: #4caf50; }
+.badge-atencao::before { content: '●'; font-size: 9px; color: #ff6d00; }
+.badge-critica::before { content: '●'; font-size: 9px; color: #c62828; }
 
 /* ===========================
    RELATÓRIOS

@@ -214,11 +214,13 @@
                             <label>Origem</label>
                             <input type="text" id="colmeiaOrigem" placeholder="Ex: Captura, Divisão, Compra">
                         </div>
+                        <!-- ✏️ ALTERADO: opções de status atualizadas -->
                         <div class="form-campo">
                             <label>Status</label>
                             <select id="colmeiaStatus">
-                                <option value="ativa">Ativa</option>
-                                <option value="inativa">Inativa</option>
+                                <option value="boa">🟢 Boa</option>
+                                <option value="atencao">🟠 Atenção</option>
+                                <option value="critica">🔴 Crítica</option>
                             </select>
                         </div>
                         <div class="form-campo">
@@ -235,10 +237,12 @@
                 <div class="card">
                     <div class="filtro-colmeias">
                         <input type="text" id="buscaColmeia" placeholder="🔍 Buscar por código ou espécie..." oninput="filtrarColmeias()">
+                        <!-- ✏️ ALTERADO: opções de filtro atualizadas -->
                         <select id="filtroStatusColmeia" onchange="filtrarColmeias()">
                             <option value="">Todos os status</option>
-                            <option value="ativa">Ativas</option>
-                            <option value="inativa">Inativas</option>
+                            <option value="boa">🟢 Boa</option>
+                            <option value="atencao">🟠 Atenção</option>
+                            <option value="critica">🔴 Crítica</option>
                         </select>
                     </div>
                     <div id="tabelaColmeias"></div>
